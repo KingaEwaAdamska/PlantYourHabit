@@ -44,6 +44,21 @@ val DividerColor = Color(0xFFE7E5DD)
 val FlowerPink = Color(0xFFD88975)
 val Lavender = Color(0xFF9A81AE)
 val LeafGreen = Color(0xFF7C9069)
+val EveningGardenBackdrop = Color(0xFF9D8790)
+val PlantCardBorder = Color(0xFFB9C4BA)
+val ShelfPostWood = Color(0xFF815438)
+val ShelfPostHighlight = Color(0xFFA56F48)
+val ShelfPlankWood = Color(0xFF865738)
+val ShelfPlankHighlight = Color(0xFFAE774D)
+val GardenWindowFrame = Color(0xFFEDF0DF)
+val GardenWindowGlass = Color(0xFFB8D3D2)
+val GardenWindowSun = Color(0xFFE8D58C)
+val ShopDisplayBase = Color(0xFFC69B69)
+val EveningThemePreview = Color(0xFF8992A0)
+val DarkThemeSurface = Color(0xFF30483A)
+val DarkThemeSurfaceVariant = Color(0xFF3B604D)
+val DarkThemeOutline = Color(0xFF68806D)
+val DarkThemeOutlineVariant = Color(0xFF496454)
 
 data class FlowerPalette(
     val stem: Color,
@@ -52,16 +67,25 @@ data class FlowerPalette(
     val pot: Color,
     val potRim: Color,
     val potShadow: Color,
-    val cactusBody: Color,
-    val cactusOutline: Color,
-    val cactusHighlight: Color,
     val witheredStem: Color,
     val witheredLeaf: Color,
-    val seed: Color,
+    val seed: Color
+)
+
+data class CactusPalette(
+    val body: Color,
+    val outline: Color,
+    val highlight: Color
+)
+
+data class BlossomPalette(
     val blossomLight: Color,
     val blossom: Color,
     val blossomDark: Color,
-    val blossomCenter: Color,
+    val center: Color
+)
+
+data class LavenderPalette(
     val lavenderLight: Color,
     val lavenderDark: Color
 )
@@ -74,41 +98,80 @@ object FlowerPalettes {
         pot = Color(0xFFBF8744),
         potRim = Color(0xFFE7BD72),
         potShadow = Color(0xFF6F4D35),
-        cactusBody = Color(0xFF4F8A61),
-        cactusOutline = Color(0xFF396E51),
-        cactusHighlight = Color(0xFF68A073),
-        witheredStem = Color(0xFF33691E),
+        witheredStem = Color(0xFF88785B),
         witheredLeaf = Color(0xFF9A8059),
-        seed = Color(0xFF8C704B),
-        blossomLight = Color(0xFFF0B29B),
-        blossom = Color(0xFFE4A08B),
-        blossomDark = Color(0xFFD88975),
-        blossomCenter = Color(0xFFE8B657),
-        lavenderLight = Color(0xFFA189B3),
-        lavenderDark = Color(0xFF8F78A4)
+        seed = Color(0xFF8C704B)
     )
-    val Fern = Monstera.copy(
+    val Fern = FlowerPalette(
         stem = Color(0xFF41694A),
         leaf = Color(0xFF688C5D),
         leafVein = Color(0xFFDCE8D9),
+        potShadow = Color(0xFF6F4D35),
         pot = Color(0xFF587969),
-        potRim = Color(0xFF8AAA98)
+        potRim = Color(0xFF8AAA98),
+        witheredStem = Color(0xFF88785B),
+        witheredLeaf = Color(0xFF9A8059),
+        seed = Color(0xFF8C704B)
     )
-    val Sprout = Monstera.copy(
+    val Sprout = FlowerPalette(
         stem = Color(0xFF718261),
-        leaf = Color(0xFF7C9069)
+        leaf = Color(0xFF7C9069),
+        leafVein = Color(0xFFDCE8D9),
+        pot = Color(0xFFB8734F),
+        potRim = Color(0xFFD89162),
+        potShadow = Color(0xFF6F4D35),
+        witheredStem = Color(0xFF88785B),
+        witheredLeaf = Color(0xFF9A8059),
+        seed = Color(0xFF8C704B)
     )
-    val CoralBlossom = Monstera.copy(
+    val CoralBlossom = FlowerPalette(
         stem = Color(0xFF4E774F),
-        leaf = Color(0xFF4F7954)
+        leaf = Color(0xFF4F7954),
+        leafVein = Color(0xFFDCE8D9),
+        pot = Color(0xFFB8734F),
+        potRim = Color(0xFFD89162),
+        potShadow = Color(0xFF6F4D35),
+        witheredStem = Color(0xFF88785B),
+        witheredLeaf = Color(0xFF9A8059),
+        seed = Color(0xFF8C704B)
     )
-    val LavenderPlant = Monstera.copy(
+    val LavenderPlant = FlowerPalette(
         stem = Color(0xFF527150),
-        leaf = Color(0xFF668060)
+        leaf = Color(0xFF668060),
+        leafVein = Color(0xFFDCE8D9),
+        pot = Color(0xFFB8734F),
+        potRim = Color(0xFFD89162),
+        potShadow = Color(0xFF6F4D35),
+        witheredStem = Color(0xFF88785B),
+        witheredLeaf = Color(0xFF9A8059),
+        seed = Color(0xFF8C704B)
     )
-    val Cactus = Monstera.copy(
+    val Cactus = FlowerPalette(
         stem = Color(0xFF396E51),
-        leaf = Color(0xFF5D956A)
+        leaf = Color(0xFF5D956A),
+        leafVein = Color(0xFFDCE8D9),
+        pot = Color(0xFFB8734F),
+        potRim = Color(0xFFD89162),
+        potShadow = Color(0xFF6F4D35),
+        witheredStem = Color(0xFF88785B),
+        witheredLeaf = Color(0xFF9A8059),
+        seed = Color(0xFF8C704B)
+    )
+
+    val CactusDetails = CactusPalette(
+        body = Color(0xFF4F8A61),
+        outline = Color(0xFF396E51),
+        highlight = Color(0xFF68A073)
+    )
+    val BlossomDetails = BlossomPalette(
+        blossomLight = Color(0xFFF0B29B),
+        blossom = Color(0xFFE4A08B),
+        blossomDark = Color(0xFFD88975),
+        center = Color(0xFFE8B657)
+    )
+    val LavenderDetails = LavenderPalette(
+        lavenderLight = Color(0xFFA189B3),
+        lavenderDark = Color(0xFF8F78A4)
     )
 
     fun forPlant(type: String): FlowerPalette = when (type) {

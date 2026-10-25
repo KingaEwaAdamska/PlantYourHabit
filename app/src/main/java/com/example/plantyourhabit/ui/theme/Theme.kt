@@ -24,14 +24,14 @@ private val DarkColorScheme = darkColorScheme(
     background = Green900,
     onBackground = CreamBackground,
 
-    surface = Color(0xFF30483A),
+    surface = DarkThemeSurface,
     onSurface = CreamBackground,
 
-    surfaceVariant = Color(0xFF3B604D),
+    surfaceVariant = DarkThemeSurfaceVariant,
     onSurfaceVariant = Green200,
 
-    outline = Color(0xFF68806D),
-    outlineVariant = Color(0xFF496454),
+    outline = DarkThemeOutline,
+    outlineVariant = DarkThemeOutlineVariant,
 
     error = Terracotta300,
     onError = Green900,
@@ -58,7 +58,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceVariant = Green100,
     onSurfaceVariant = Green700,
 
-    outline = Color(0xFFB9C4BA),
+    outline = PlantCardBorder,
     outlineVariant = BorderColor,
 
     error = Terracotta700,

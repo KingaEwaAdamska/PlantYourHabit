@@ -27,8 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.BeigeMedium
 import com.example.plantyourhabit.ui.theme.CreamBackground
@@ -43,6 +41,8 @@ import com.example.plantyourhabit.ui.theme.Green700
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextMuted
 import com.example.plantyourhabit.ui.theme.TextSecondary
+import com.example.plantyourhabit.ui.theme.ShopDisplayBase
+import com.example.plantyourhabit.ui.theme.EveningThemePreview
 
 private data class ShopProduct(val id: Int, val name: String, val price: Int, val art: String)
 
@@ -89,38 +89,38 @@ fun ShopScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(CreamBackground)
-            .padding(horizontal = 16.dp, vertical = 5.dp)
+            .padding(horizontal = ShopTokens.PageInset, vertical = ShopTokens.MicroPadding)
     ) {
         Card(
-            shape = RoundedCornerShape(27.dp),
+            shape = RoundedCornerShape(ShopTokens.LargeCardRadius),
             colors = CardDefaults.cardColors(containerColor = BeigeMedium)
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp),
+                    .height(ShopTokens.ShopIllustrationHeight),
                 contentAlignment = Alignment.Center
             ) {
-                Text("✦", modifier = Modifier.align(Alignment.TopStart).padding(28.dp), color = Color.White, fontSize = 24.sp)
-                Text("✦", modifier = Modifier.align(Alignment.TopEnd).padding(24.dp), color = Color.White, fontSize = 16.sp)
+                Text("✦", modifier = Modifier.align(Alignment.TopStart).padding(ShopTokens.ShopStarInnerInset), color = Color.White, fontSize = ShopTokens.QuestHeroText)
+                Text("✦", modifier = Modifier.align(Alignment.TopEnd).padding(ShopTokens.ShopStarOuterInset), color = Color.White, fontSize = ShopTokens.NavigationTitleText)
                 Row(
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 21.dp)
-                        .background(Color(0xFFC69B69), CircleShape)
-                        .padding(horizontal = 27.dp, vertical = 10.dp),
+                        .padding(bottom = ShopTokens.ProductDecorationInset)
+                        .background(ShopDisplayBase, CircleShape)
+                        .padding(horizontal = ShopTokens.ShopArtworkHorizontalPadding, vertical = ShopTokens.ContentInset),
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    Text("🍄", fontSize = 42.sp)
-                    Spacer(Modifier.width(20.dp))
-                    Text("🐌", fontSize = 40.sp)
+                    Text("🍄", fontSize = ShopTokens.ShopMushroomText)
+                    Spacer(Modifier.width(ShopTokens.LargeSpacing))
+                    Text("🐌", fontSize = ShopTokens.ShopSnailArtText)
                 }
             }
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 20.dp),
+                .padding(vertical = ShopTokens.LargeSpacing),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SectionKicker("MAKE IT YOURS", Green700)
@@ -128,19 +128,19 @@ fun ShopScreen(
                 "Find something lovely",
                 color = Green900,
                 fontFamily = FontFamily.Serif,
-                fontSize = 22.sp,
+                fontSize = ShopTokens.LargeBodyText,
                 fontWeight = FontWeight.SemiBold
             )
             Text(
                 "Spend the gold you earn on tiny treasures for your garden shelf.",
-                modifier = Modifier.padding(top = 7.dp),
+                modifier = Modifier.padding(top = ShopTokens.LabelInset),
                 color = TextSecondary,
-                fontSize = 12.sp,
-                lineHeight = 17.sp
+                fontSize = ShopTokens.BodyText,
+                lineHeight = ShopTokens.SupportingTitleText
             )
         }
         ShopSectionHeading("FOR YOUR SHELF", "Tiny trinkets", "${ownedTrinkets.size}/${trinkets.size}")
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
             trinkets.forEach { product ->
                 val owned = product.id in ownedTrinkets
                 val canAfford = gold >= product.price
@@ -154,7 +154,7 @@ fun ShopScreen(
             }
         }
         ShopSectionHeading("NEW VARIETIES", "Plants to grow", "${ownedPlants.size}/${plantProducts.size}")
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
             plantProducts.forEach { product ->
                 val id = when (product.id) {
                     1 -> "bloom"
@@ -180,7 +180,7 @@ fun ShopScreen(
             "${ownedBackgrounds.size}/${gardenThemes.size}"
         )
         Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)
         ) {
             gardenThemes.take(2).forEach { theme ->
                 BackgroundCard(
@@ -193,8 +193,8 @@ fun ShopScreen(
                 )
             }
         }
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Spacer(Modifier.height(ShopTokens.StandardInset))
+        Row(horizontalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
             gardenThemes.drop(2).forEach { theme ->
                 BackgroundCard(
                     product = theme,
@@ -210,9 +210,9 @@ fun ShopScreen(
             "✦  New treasures arrive every Sunday",
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 18.dp),
+                .padding(vertical = ShopTokens.SectionInset),
             color = TextMuted,
-            fontSize = 10.sp
+            fontSize = ShopTokens.SupportingText
         )
     }
 }
@@ -227,35 +227,35 @@ private fun ProductCard(
 ) {
     Surface(
         modifier = modifier.clickable(enabled = !owned && canAfford, onClick = onClick),
-        shape = RoundedCornerShape(19.dp),
+        shape = RoundedCornerShape(ShopTokens.ShopCardRadius),
         color = if (owned) Green100 else CreamSurface
     ) {
         Column(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(ShopTokens.StandardInset),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(78.dp)
-                    .background(BeigeBackground, RoundedCornerShape(13.dp)),
+                    .height(ShopTokens.ShopProductPreviewHeight)
+                    .background(BeigeBackground, RoundedCornerShape(ShopTokens.ShopProductPreviewCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(product.art, fontSize = 36.sp)
+                Text(product.art, fontSize = ShopTokens.ProductCardArtText)
             }
             Text(
                 product.name,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = ShopTokens.StandardInset),
                 color = Green900,
                 fontWeight = FontWeight.Bold,
-                fontSize = 10.sp
+                fontSize = ShopTokens.SupportingText
             )
             Text(
                 if (owned) "On shelf ✓" else "🪙 ${product.price}",
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = ShopTokens.CompactInset),
                 color = if (owned) Green700 else Gold700,
                 fontWeight = FontWeight.Bold,
-                fontSize = 9.sp
+                fontSize = ShopTokens.CaptionText
             )
         }
     }
@@ -276,34 +276,34 @@ private fun ShopListRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = owned || canAfford, onClick = onClick),
-        shape = RoundedCornerShape(19.dp),
+        shape = RoundedCornerShape(ShopTokens.ShopCardRadius),
         color = if (owned) Green100 else CreamSurface
     ) {
         Row(
-            modifier = Modifier.padding(9.dp),
+            modifier = Modifier.padding(ShopTokens.ComfortableInset),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(66.dp)
-                    .background(Green100, RoundedCornerShape(15.dp)),
+                    .size(ShopTokens.ShopPlantPreviewSize)
+                    .background(Green100, RoundedCornerShape(ShopTokens.ShopPlantPreviewCornerRadius)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(art, fontSize = 32.sp)
+                Text(art, fontSize = ShopTokens.ShopPlantArtText)
             }
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(ShopTokens.ContentInset))
             Column(modifier = Modifier.weight(1f)) {
-                Text(eyebrow, color = Gold700, fontSize = 8.sp, fontWeight = FontWeight.Bold)
-                Text(name, color = Green900, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                Text(detail, color = TextMuted, fontSize = 9.sp)
+                Text(eyebrow, color = Gold700, fontSize = ShopTokens.SmallLabelText, fontWeight = FontWeight.Bold)
+                Text(name, color = Green900, fontSize = ShopTokens.BodyText, fontWeight = FontWeight.Bold)
+                Text(detail, color = TextMuted, fontSize = ShopTokens.CaptionText)
             }
             Text(
                 if (owned) "✓ Owned" else "🪙 $price",
                 modifier = Modifier
                     .background(if (owned) Green200 else Gold100, CircleShape)
-                    .padding(horizontal = 8.dp, vertical = 7.dp),
+                    .padding(horizontal = ShopTokens.StandardInset, vertical = ShopTokens.LabelInset),
                 color = if (owned) Green700 else Gold700,
-                fontSize = 9.sp,
+                fontSize = ShopTokens.CaptionText,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -323,40 +323,40 @@ private fun BackgroundCard(
     val previewColor = when (product.id) {
         1 -> Green300
         2 -> BeigeMedium
-        3 -> Color(0xFF8992A0)
+        3 -> EveningThemePreview
         else -> Green500
     }
     Surface(
         modifier = modifier.clickable(enabled = owned || canAfford, onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(ShopTokens.ShopBackgroundCardCornerRadius),
         color = if (isActive) Green100 else CreamSurface,
-        shadowElevation = if (isActive) 2.dp else 0.dp
+        shadowElevation = if (isActive) ShopTokens.TinyInset else ShopTokens.NoElevation
     ) {
-        Column(modifier = Modifier.padding(6.dp)) {
+        Column(modifier = Modifier.padding(ShopTokens.SmallInset)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(78.dp)
-                    .background(previewColor, RoundedCornerShape(12.dp)),
+                    .height(ShopTokens.ShopProductPreviewHeight)
+                    .background(previewColor, RoundedCornerShape(ShopTokens.CardInset)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(product.art, fontSize = 25.sp)
+                Text(product.art, fontSize = ShopTokens.ShopProductArtText)
                 if (isActive) {
                     Surface(
-                        modifier = Modifier.align(Alignment.TopEnd).padding(5.dp),
+                        modifier = Modifier.align(Alignment.TopEnd).padding(ShopTokens.MicroPadding),
                         shape = CircleShape,
                         color = Green700
                     ) {
-                        Text("✓", modifier = Modifier.padding(4.dp), color = Color.White, fontSize = 10.sp)
+                        Text("✓", modifier = Modifier.padding(ShopTokens.CompactInset), color = Color.White, fontSize = ShopTokens.SupportingText)
                     }
                 }
             }
             Text(
                 product.name,
-                modifier = Modifier.padding(start = 2.dp, top = 6.dp),
+                modifier = Modifier.padding(start = ShopTokens.TinyInset, top = ShopTokens.SmallInset),
                 color = Green900,
                 fontWeight = FontWeight.Bold,
-                fontSize = 9.sp
+                fontSize = ShopTokens.CaptionText
             )
             Text(
                 when {
@@ -364,9 +364,9 @@ private fun BackgroundCard(
                     owned -> "Tap to use"
                     else -> "🪙 ${product.price}"
                 },
-                modifier = Modifier.padding(start = 2.dp, top = 2.dp),
+                modifier = Modifier.padding(start = ShopTokens.TinyInset, top = ShopTokens.TinyInset),
                 color = if (owned) Green700 else Gold700,
-                fontSize = 8.sp,
+                fontSize = ShopTokens.SmallLabelText,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -378,7 +378,7 @@ private fun ShopSectionHeading(kicker: String, title: String, count: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 3.dp, top = 20.dp, bottom = 10.dp),
+            .padding(start = ShopTokens.TightInset, top = ShopTokens.LargeSpacing, bottom = ShopTokens.ContentInset),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom
     ) {
@@ -388,10 +388,10 @@ private fun ShopSectionHeading(kicker: String, title: String, count: String) {
                 title,
                 color = Green900,
                 fontFamily = FontFamily.Serif,
-                fontSize = 19.sp,
+                fontSize = ShopTokens.ShopTitleText,
                 fontWeight = FontWeight.SemiBold
             )
         }
-        Text(count, color = TextMuted, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Text(count, color = TextMuted, fontSize = ShopTokens.SupportingText, fontWeight = FontWeight.Bold)
     }
 }

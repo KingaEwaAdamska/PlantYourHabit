@@ -29,8 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
@@ -71,16 +69,16 @@ fun QuestsScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .background(CreamBackground)
-            .padding(horizontal = 16.dp, vertical = 5.dp)
+            .padding(horizontal = QuestsTokens.PageInset, vertical = QuestsTokens.MicroPadding)
     ) {
         Card(
-            shape = RoundedCornerShape(27.dp),
+            shape = RoundedCornerShape(QuestsTokens.LargeCardRadius),
             colors = CardDefaults.cardColors(containerColor = Green200)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(QuestsTokens.LargeSpacing),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -89,24 +87,24 @@ fun QuestsScreen(
                         "Small adventures,\nwhenever you're ready.",
                         color = Green900,
                         fontFamily = FontFamily.Serif,
-                        fontSize = 24.sp,
-                        lineHeight = 27.sp,
+                        fontSize = QuestsTokens.QuestHeroText,
+                        lineHeight = QuestsTokens.QuestHeroLineHeight,
                         fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(Modifier.height(10.dp))
+                    Spacer(Modifier.height(QuestsTokens.ContentInset))
                     Text(
                         "No deadlines here. Pick a sidequest and earn a little gold.",
                         color = TextSecondary,
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp
+                        fontSize = QuestsTokens.BodyText,
+                        lineHeight = QuestsTokens.SupportingTitleText
                     )
                 }
-                Text("🗺️", fontSize = 38.sp)
+                Text("🗺️", fontSize = QuestsTokens.QuestMapText)
             }
         }
         Column(
-            modifier = Modifier.padding(top = 18.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp)
+            modifier = Modifier.padding(top = QuestsTokens.SectionInset),
+            verticalArrangement = Arrangement.spacedBy(QuestsTokens.ComfortableInset)
         ) {
             quests.forEach { quest ->
                 val done = quest.id in completedQuests
@@ -119,13 +117,13 @@ fun QuestsScreen(
             onClick = {},
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp),
-            shape = RoundedCornerShape(16.dp),
+                .padding(top = QuestsTokens.PageInset),
+            shape = RoundedCornerShape(QuestsTokens.AddQuestButtonCornerRadius),
             colors = ButtonDefaults.buttonColors(containerColor = Green800)
         ) {
             Text("＋  Add a sidequest", color = Color.White, fontWeight = FontWeight.Bold)
         }
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(QuestsTokens.LargeInset))
     }
 }
 
@@ -135,12 +133,12 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = !done, onClick = onClick),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(QuestsTokens.QuestCardCornerRadius),
         color = if (done) Green100 else CreamSurface,
-        shadowElevation = 1.dp
+        shadowElevation = QuestsTokens.Hairline
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = QuestsTokens.CardContentInset, vertical = QuestsTokens.CardInset),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Surface(
@@ -150,16 +148,16 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
                 Text(
                     if (done) "✓" else "",
                     modifier = Modifier
-                        .size(25.dp)
-                        .padding(top = 2.dp),
+                        .size(QuestsTokens.CheckmarkSize)
+                        .padding(top = QuestsTokens.TinyInset),
                     color = Color.White,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    fontSize = 14.sp
+                    fontSize = QuestsTokens.CheckmarkText
                 )
             }
-            Spacer(Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Spacer(Modifier.width(QuestsTokens.ContentInset))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
                     TagChip(quest.difficulty, if (quest.difficulty == "Easy") Green100 else Gold100)
                     quest.tags.forEach { TagChip(it, BeigeBackground) }
                 }
@@ -167,18 +165,18 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
                     quest.title,
                     color = Green900,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
+                    fontSize = QuestsTokens.CardTitleText,
                     textDecoration = if (done) TextDecoration.LineThrough else TextDecoration.None
                 )
-                Text(quest.description, color = TextSecondary, fontSize = 10.sp, lineHeight = 13.sp)
+                Text(quest.description, color = TextSecondary, fontSize = QuestsTokens.SupportingText, lineHeight = QuestsTokens.CardTitleText)
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(QuestsTokens.StandardInset))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🪙", color = Gold600, fontSize = 13.sp)
+                Text("🪙", color = Gold600, fontSize = QuestsTokens.CardTitleText)
                 Text(
                     if (done) "Done" else quest.reward.toString(),
                     color = Gold700,
-                    fontSize = 10.sp,
+                    fontSize = QuestsTokens.SupportingText,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -191,9 +189,9 @@ private fun TagChip(text: String, color: Color) {
     Surface(shape = CircleShape, color = color) {
         Text(
             text.uppercase(),
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+            modifier = Modifier.padding(horizontal = QuestsTokens.SmallInset, vertical = QuestsTokens.TightInset),
             color = Green700,
-            fontSize = 8.sp,
+            fontSize = QuestsTokens.SmallLabelText,
             fontWeight = FontWeight.Bold
         )
     }

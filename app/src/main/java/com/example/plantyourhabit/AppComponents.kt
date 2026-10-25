@@ -20,8 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -42,7 +40,7 @@ fun AppHeader(destination: AppDestinations, gold: Int) {
         modifier = Modifier
             .fillMaxWidth()
             .background(CreamBackground)
-            .padding(horizontal = 22.dp, vertical = 16.dp),
+            .padding(horizontal = AppTokens.HeaderInset, vertical = AppTokens.PageInset),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -50,9 +48,9 @@ fun AppHeader(destination: AppDestinations, gold: Int) {
             Text(
                 text = if (destination == AppDestinations.GARDEN) today else "",
                 color = TextSecondary,
-                fontSize = 10.sp,
+                fontSize = AppTokens.SupportingText,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.2.sp
+                letterSpacing = AppTokens.DateLetterSpacing
             )
             Text(
                 text = when (destination) {
@@ -62,21 +60,21 @@ fun AppHeader(destination: AppDestinations, gold: Int) {
                 },
                 color = Green900,
                 fontFamily = FontFamily.Serif,
-                fontSize = 23.sp,
+                fontSize = AppTokens.PageTitleText,
                 fontWeight = FontWeight.SemiBold
             )
         }
         Surface(
-            shape = RoundedCornerShape(24.dp),
+            shape = RoundedCornerShape(AppTokens.CurrencyPillRadius),
             color = Gold100
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                modifier = Modifier.padding(horizontal = AppTokens.CardInset, vertical = AppTokens.ComfortableInset),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("🪙", color = Gold700, fontSize = 15.sp)
-                Spacer(Modifier.width(6.dp))
-                Text("$gold", color = Gold700, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                Text("🪙", color = Gold700, fontSize = AppTokens.CurrencyText)
+                Spacer(Modifier.width(AppTokens.SmallInset))
+                Text("$gold", color = Gold700, fontWeight = FontWeight.Bold, fontSize = AppTokens.CardTitleText)
             }
         }
     }
@@ -87,9 +85,9 @@ fun SectionKicker(text: String, color: Color) {
     Text(
         text,
         color = color,
-        fontSize = 9.sp,
+        fontSize = AppTokens.CaptionText,
         fontWeight = FontWeight.Bold,
-        letterSpacing = 1.1.sp
+        letterSpacing = AppTokens.HeadingLetterSpacing
     )
 }
 
@@ -97,14 +95,14 @@ fun SectionKicker(text: String, color: Color) {
 fun SoftActionButton(text: String, modifier: Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(40.dp),
-        shape = RoundedCornerShape(14.dp),
+        modifier = modifier.height(AppTokens.SoftActionButtonHeight),
+        shape = RoundedCornerShape(AppTokens.SoftActionButtonCornerRadius),
         colors = ButtonDefaults.buttonColors(
             containerColor = CreamSurface,
             contentColor = Green700
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+        elevation = ButtonDefaults.buttonElevation(defaultElevation = AppTokens.NoElevation)
     ) {
-        Text(text, fontSize = 10.sp, fontWeight = FontWeight.Bold)
+        Text(text, fontSize = AppTokens.SupportingText, fontWeight = FontWeight.Bold)
     }
 }

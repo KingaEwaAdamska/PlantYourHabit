@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import com.example.plantyourhabit.ui.theme.Green300
 import com.example.plantyourhabit.ui.theme.Green500
@@ -67,7 +66,7 @@ fun PlantYourHabitApp() {
     var currentDestination by rememberSaveable {
         mutableStateOf(AppDestinations.GARDEN)
     }
-    var gold by rememberSaveable { mutableStateOf(120) }
+    var gold by rememberSaveable { mutableStateOf(STARTING_GOLD_BALANCE) }
     val habits = remember {
         mutableStateListOf<Habit>().apply {
             addAll(initialHabits.map { habit ->
@@ -213,7 +212,7 @@ private fun CustomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(colorScheme.surface)
-            .padding(vertical = 8.dp),
+            .padding(vertical = AppTokens.StandardInset),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -232,7 +231,7 @@ private fun CustomNavigationBar(
                     ) {
                         onDestinationSelected(destination)
                     }
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = AppTokens.CompactInset),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -271,22 +270,22 @@ private fun DestinationNavigationIcon(
         targetValue = if (selected) Green300 else Color.Transparent,
         animationSpec = if (selected) {
             keyframes {
-                durationMillis = 400
+                durationMillis = NAV_SELECTION_ANIMATION_MILLIS
 
                 surfaceColor at 0
-                Green500 at 200
-                Green300 at 400
+                Green500 at NAV_SELECTION_MIDPOINT_MILLIS
+                Green300 at NAV_SELECTION_ANIMATION_MILLIS
             }
         } else {
-            tween(durationMillis = 400)
+            tween(durationMillis = NAV_SELECTION_ANIMATION_MILLIS)
         },
         label = "navigationSelection"
     )
 
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .size(AppTokens.NavigationIconSize)
+            .clip(RoundedCornerShape(AppTokens.NavigationIconCornerRadius))
             .background(color, RectangleShape),
         contentAlignment = Alignment.Center
     ) {
