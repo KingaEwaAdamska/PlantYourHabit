@@ -45,3 +45,78 @@ val FlowerPink = Color(0xFFD88975)
 val Lavender = Color(0xFF9A81AE)
 val LeafGreen = Color(0xFF7C9069)
 
+data class FlowerPalette(
+    val stem: Color,
+    val leaf: Color,
+    val leafVein: Color,
+    val pot: Color,
+    val potRim: Color,
+    val potShadow: Color,
+    val cactusBody: Color,
+    val cactusOutline: Color,
+    val cactusHighlight: Color,
+    val witheredStem: Color,
+    val witheredLeaf: Color,
+    val seed: Color,
+    val blossomLight: Color,
+    val blossom: Color,
+    val blossomDark: Color,
+    val blossomCenter: Color,
+    val lavenderLight: Color,
+    val lavenderDark: Color
+)
+
+object FlowerPalettes {
+    val Monstera = FlowerPalette(
+        stem = Color(0xFF41694A),
+        leaf = Color(0xFF4F7954),
+        leafVein = Color(0xFFDCE8D9),
+        pot = Color(0xFFBF8744),
+        potRim = Color(0xFFE7BD72),
+        potShadow = Color(0xFF6F4D35),
+        cactusBody = Color(0xFF4F8A61),
+        cactusOutline = Color(0xFF396E51),
+        cactusHighlight = Color(0xFF68A073),
+        witheredStem = Color(0xFF33691E),
+        witheredLeaf = Color(0xFF9A8059),
+        seed = Color(0xFF8C704B),
+        blossomLight = Color(0xFFF0B29B),
+        blossom = Color(0xFFE4A08B),
+        blossomDark = Color(0xFFD88975),
+        blossomCenter = Color(0xFFE8B657),
+        lavenderLight = Color(0xFFA189B3),
+        lavenderDark = Color(0xFF8F78A4)
+    )
+    val Fern = Monstera.copy(
+        stem = Color(0xFF41694A),
+        leaf = Color(0xFF688C5D),
+        leafVein = Color(0xFFDCE8D9),
+        pot = Color(0xFF587969),
+        potRim = Color(0xFF8AAA98)
+    )
+    val Sprout = Monstera.copy(
+        stem = Color(0xFF718261),
+        leaf = Color(0xFF7C9069)
+    )
+    val CoralBlossom = Monstera.copy(
+        stem = Color(0xFF4E774F),
+        leaf = Color(0xFF4F7954)
+    )
+    val LavenderPlant = Monstera.copy(
+        stem = Color(0xFF527150),
+        leaf = Color(0xFF668060)
+    )
+    val Cactus = Monstera.copy(
+        stem = Color(0xFF396E51),
+        leaf = Color(0xFF5D956A)
+    )
+
+    fun forPlant(type: String): FlowerPalette = when (type) {
+        "fern" -> Fern
+        "sprout" -> Sprout
+        "bloom" -> CoralBlossom
+        "lavender" -> LavenderPlant
+        "cactus" -> Cactus
+        else -> Monstera
+    }
+}
