@@ -1,7 +1,6 @@
 package com.example.plantyourhabit
 
 import android.os.Bundle
-import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -38,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.platform.LocalContext
 import com.example.plantyourhabit.ui.theme.Green300
 import com.example.plantyourhabit.ui.theme.Green500
 import com.example.plantyourhabit.ui.theme.PlantYourHabitTheme
@@ -59,24 +57,13 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun PlantYourHabitApp() {
-    val context = LocalContext.current
-    val habitPreferences = remember {
-        context.getSharedPreferences("habit_care_days_v2", Context.MODE_PRIVATE)
-    }
     var currentDestination by rememberSaveable {
         mutableStateOf(AppDestinations.GARDEN)
     }
     var gold by rememberSaveable { mutableStateOf(STARTING_GOLD_BALANCE) }
     val habits = remember {
         mutableStateListOf<Habit>().apply {
-            addAll(initialHabits.map { habit ->
-                val savedCareDays = habitPreferences.getString("habit_${habit.id}", null)
-                val careDays = savedCareDays
-                    ?.split(",")
-                    ?.filter(String::isNotBlank)
-                    ?: habit.careDays
-                habit.copy(careDays = careDays)
-            })
+            addAll(initialHabits)
         }
     }
     var completedQuests by remember { mutableStateOf(setOf<Int>()) }
@@ -125,26 +112,17 @@ fun PlantYourHabitApp() {
                         selectedPlants[habitId] = plant
                     },
                     onToggleHabit = { habit ->
-                        val today = LocalDate.now().toString()
-                        val careDays = habit.careDays
-                        val done = today in careDays
-                        val updatedCareDays = if (done) {
-                            careDays.filterNot { it == today }
-                        } else if (
-                            careDays.map(LocalDate::parse).maxOrNull() ==
-                            LocalDate.now().minusDays(1)
-                        ) {
-                            (careDays + today).distinct().sorted().takeLast(MAX_STREAK_DAY)
+                        val today = LocalDate.now()
+                        val done = today.toString() in habit.careDays
+                        val updatedHabit = if (done) {
+                            habit.removeToday(today)
                         } else {
-                            listOf(today)
+                            habit.addToday(today)
                         }
                         val habitIndex = habits.indexOfFirst { it.id == habit.id }
                         if (habitIndex >= 0) {
-                            habits[habitIndex] = habit.copy(careDays = updatedCareDays)
+                            habits[habitIndex] = updatedHabit
                         }
-                        habitPreferences.edit()
-                            .putString("habit_${habit.id}", updatedCareDays.joinToString(","))
-                            .apply()
 
                         gold = (
                                 gold + if (done) -habit.reward else habit.reward

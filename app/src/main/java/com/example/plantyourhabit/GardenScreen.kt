@@ -36,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -47,7 +49,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.delay
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 import com.example.plantyourhabit.ui.theme.BeigeMedium
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
@@ -61,6 +62,8 @@ import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextMuted
 import com.example.plantyourhabit.ui.theme.FlowerPalettes
 import com.example.plantyourhabit.ui.theme.EveningGardenBackdrop
+import com.example.plantyourhabit.ui.theme.EveningGardenSunset
+import com.example.plantyourhabit.ui.theme.ForestGardenBackdrop
 import com.example.plantyourhabit.ui.theme.PlantCardBorder
 import com.example.plantyourhabit.ui.theme.ShelfPostWood
 import com.example.plantyourhabit.ui.theme.ShelfPostHighlight
@@ -70,35 +73,6 @@ import com.example.plantyourhabit.ui.theme.GardenWindowFrame
 import com.example.plantyourhabit.ui.theme.GardenWindowGlass
 import com.example.plantyourhabit.ui.theme.GardenWindowSun
 import com.example.plantyourhabit.ui.theme.BeigeLight
-
-private data class PlantGrowth(
-    val days: Int,
-    val label: String,
-    val hasHistory: Boolean
-)
-
-private fun plantGrowth(careDays: List<String>, today: LocalDate): PlantGrowth {
-    if (careDays.isEmpty()) return PlantGrowth(0, "SEED", false)
-    val recordedDays = careDays.map(LocalDate::parse).toSet()
-    val latestCare = recordedDays.maxOrNull() ?: return PlantGrowth(0, "SEED", false)
-    val daysSinceCare = ChronoUnit.DAYS.between(latestCare, today).toInt().coerceAtLeast(0)
-    var streak = 0
-    var date = latestCare
-    while (date in recordedDays && streak < MAX_STREAK_DAY) {
-        streak++
-        date = date.minusDays(1)
-    }
-    val days = (streak - daysSinceCare).coerceIn(0, MAX_STREAK_DAY)
-    val growthLabel = when {
-        days >= MAX_STREAK_DAY -> "FULL BLOOM"
-        days >= BLOOMING_STAGE_START_DAY -> "BLOOMING"
-        days >= BUDDING_STAGE_START_DAY -> "BUDDING"
-        days >= GROWING_STAGE_START_DAY -> "GROWING"
-        days > 0 -> "SEEDLING"
-        else -> "WITHERING"
-    }
-    return PlantGrowth(days, growthLabel, true)
-}
 
 @Composable
 fun GardenScreen(
@@ -119,15 +93,12 @@ fun GardenScreen(
             today = LocalDate.now()
         }
     }
-    val growthByHabit = habits.associate { habit ->
-        habit.id to plantGrowth(habit.careDays, today)
-    }
     val progress = habits.count { today.toString() in it.careDays }
-    val backdrop = when (activeBackground) {
-        "sunroom" -> BeigeMedium
-        "evening" -> EveningGardenBackdrop
-        "forest" -> Green500
-        else -> Green300
+    val backdropBrush = when (activeBackground) {
+        "sunroom" -> Brush.verticalGradient(listOf(BeigeMedium, BeigeMedium))
+        "evening" -> Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
+        "forest" -> Brush.verticalGradient(listOf(ForestGardenBackdrop, ForestGardenBackdrop))
+        else -> Brush.verticalGradient(listOf(Green300, Green300))
     }
     Box(modifier = modifier.fillMaxSize()) {
       Column(
@@ -200,15 +171,15 @@ fun GardenScreen(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .background(backdrop)
+                    .background(backdropBrush)
             ) {
                 GardenShelf(
-                    backdrop = backdrop,
+                    backdrop = backdropBrush,
+                    activeBackground = activeBackground,
                     modifier = Modifier.fillMaxSize()
                 )
                 GardenPlants(
                     habits = habits.take(MAX_HABITS),
-                    growthByHabit = growthByHabit,
                     today = today,
                     selectedPlants = selectedPlants,
                     onEditPlant = { editingHabitId = it },
@@ -262,10 +233,15 @@ fun GardenScreen(
 }
 
 @Composable
-private fun GardenShelf(backdrop: Color, modifier: Modifier = Modifier) {
+private fun GardenShelf(
+    backdrop: Brush,
+    activeBackground: String,
+    modifier: Modifier = Modifier
+) {
     BoxWithConstraints(modifier.background(backdrop)) {
         val postTopPadding = maxHeight / MAX_HABITS - GardenTokens.ShelfPostInset
         GardenWindow(
+            activeBackground = activeBackground,
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(top = GardenTokens.CardInset, end = GardenTokens.LargeInset)
@@ -303,7 +279,6 @@ private fun GardenShelf(backdrop: Color, modifier: Modifier = Modifier) {
 @Composable
 private fun GardenPlants(
     habits: List<Habit>,
-    growthByHabit: Map<Int, PlantGrowth>,
     today: LocalDate,
     selectedPlants: Map<Int, String>,
     onEditPlant: (Int) -> Unit,
@@ -320,7 +295,6 @@ private fun GardenPlants(
                     .fillMaxWidth()
             ) {
                 habits.getOrNull(index)?.let { habit ->
-                    val growth = growthByHabit[habit.id] ?: PlantGrowth(0, "SEED", false)
                     val done = today.toString() in habit.careDays
                     val plankOffset = GardenTokens.ShelfPlankHeight +
                         if (index == MAX_HABITS - 1) bottomShelfInset else GardenTokens.NoElevation
@@ -335,13 +309,14 @@ private fun GardenPlants(
                             ShelfHabitCard(
                                 habit = habit,
                                 done = done,
-                                growth = growth,
+                                today = today,
                                 onClick = { onToggleHabit(habit) },
                                 modifier = Modifier.weight(1f)
                             )
                             GardenPlant(
                                 selectedPlants[habit.id] ?: habit.plant,
-                                growth = growth,
+                                habit = habit,
+                                today = today,
                                 modifier = Modifier
                                     .size(GardenTokens.ShelfPlantWidth, levelHeight)
                                     .offset(y = -plankOffset),
@@ -350,7 +325,8 @@ private fun GardenPlants(
                         } else {
                             GardenPlant(
                                 selectedPlants[habit.id] ?: habit.plant,
-                                growth = growth,
+                                habit = habit,
+                                today = today,
                                 modifier = Modifier
                                     .size(GardenTokens.ShelfPlantWidth, levelHeight)
                                     .offset(y = -plankOffset),
@@ -359,7 +335,7 @@ private fun GardenPlants(
                             ShelfHabitCard(
                                 habit = habit,
                                 done = done,
-                                growth = growth,
+                                today = today,
                                 onClick = { onToggleHabit(habit) },
                                 modifier = Modifier.weight(1f)
                             )
@@ -375,7 +351,7 @@ private fun GardenPlants(
 private fun ShelfHabitCard(
     habit: Habit,
     done: Boolean,
-    growth: PlantGrowth,
+    today: LocalDate,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -392,8 +368,14 @@ private fun ShelfHabitCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
+                android.util.Log.d(
+                    "GardenStreak",
+                    "name=${habit.name}, today=$today, " +
+                            "careDays=${habit.careDays.size}, " +
+                            "streak=${habit.actualStreak(today)}"
+                )
                 Text(
-                    "${if (done) "CARED TODAY · " else ""}${growth.label} · ${growth.days}/$MAX_STREAK_DAY",
+                    "${if (done) "CARED TODAY · " else ""}${habit.growthLabel(today)} · ${habit.actualStreak(today)}/$MAX_STREAK_DAY",
                     color = TextMuted,
                     fontSize = GardenTokens.TinyLabelText,
                     fontWeight = FontWeight.Bold,
@@ -425,11 +407,13 @@ private fun ShelfHabitCard(
 @Composable
 private fun ShelfPlant(
     type: String,
-    growth: PlantGrowth,
+    habit: Habit,
+    today: LocalDate,
     modifier: Modifier = Modifier
 ) {
+    val streak = habit.actualStreak(today)
     val animatedStage by animateFloatAsState(
-        targetValue = growth.days.toFloat(),
+        targetValue = streak.toFloat(),
         animationSpec = tween(durationMillis = PLANT_GROWTH_ANIMATION_MILLIS),
         label = "plantGrowth"
     )
@@ -462,7 +446,7 @@ private fun ShelfPlant(
             scale(plantScale, plantScale, pivot = androidx.compose.ui.geometry.Offset(w * .5f, h * .78f))
         }) {
         if (animatedStage <= 0f) {
-            if (growth.hasHistory) {
+            if (habit.hasCareHistory(today)) {
                 drawLine(
                     palette.witheredStem,
                     androidx.compose.ui.geometry.Offset(w * .5f, h * .78f),
@@ -670,14 +654,16 @@ private fun ShelfPlank(modifier: Modifier = Modifier) {
 @Composable
 private fun GardenPlant(
     type: String,
-    growth: PlantGrowth,
+    habit: Habit,
+    today: LocalDate,
     modifier: Modifier = Modifier,
     onEdit: () -> Unit = {}
 ) {
     Box(modifier, contentAlignment = Alignment.BottomCenter) {
         ShelfPlant(
             type,
-            growth,
+            habit,
+            today,
             Modifier
                 .fillMaxSize()
                 .padding(start = GardenTokens.SmallInset, end = GardenTokens.SmallInset, top = GardenTokens.ContentInset)
@@ -735,7 +721,8 @@ private fun PlantPickerDialog(
                     ) {
                         ShelfPlant(
                             plant,
-                            growth = PlantGrowth(MAX_STREAK_DAY, "BLOOMING", true),
+                            habit = habit.copy(careDays = exampleCareDays(MAX_STREAK_DAY)),
+                            today = LocalDate.now(),
                             modifier = Modifier.size(GardenTokens.PlantPreviewWidth, GardenTokens.PlantPickerPreviewHeight)
                         )
                         Text(
@@ -768,14 +755,52 @@ private fun String.displayName(): String = when (this) {
 }
 
 @Composable
-private fun GardenWindow(modifier: Modifier = Modifier) {
+private fun GardenWindow(activeBackground: String, modifier: Modifier = Modifier) {
+    val windowShape = RoundedCornerShape(
+        topStart = GardenTokens.GardenWindowInnerArchRadius,
+        topEnd = GardenTokens.GardenWindowInnerArchRadius,
+        bottomStart = GardenTokens.TinyInset,
+        bottomEnd = GardenTokens.TinyInset
+    )
+    val windowSky = if (activeBackground == "evening") {
+        Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
+    } else {
+        Brush.verticalGradient(listOf(GardenWindowGlass, GardenWindowGlass))
+    }
     Box(
         modifier = modifier
             .size(width = GardenTokens.GardenWindowWidth, height = GardenTokens.GardenWindowHeight)
             .background(GardenWindowFrame.copy(alpha = GARDEN_WINDOW_FRAME_OPACITY), RoundedCornerShape(topStart = GardenTokens.GardenWindowArchRadius, topEnd = GardenTokens.GardenWindowArchRadius, bottomStart = GardenTokens.TightInset, bottomEnd = GardenTokens.TightInset))
             .padding(GardenTokens.MicroPadding)
-            .background(GardenWindowGlass, RoundedCornerShape(topStart = GardenTokens.GardenWindowInnerArchRadius, topEnd = GardenTokens.GardenWindowInnerArchRadius, bottomStart = GardenTokens.TinyInset, bottomEnd = GardenTokens.TinyInset))
+            .clip(windowShape)
+            .background(windowSky, windowShape)
     ) {
+        if (activeBackground == "evening") {
+            Canvas(Modifier.fillMaxSize()) {
+                val sunCenter = Offset(size.width * 0.72f, size.height * 0.65f)
+                drawCircle(
+                    color = GardenWindowSun,
+                    radius = size.minDimension * 0.14f,
+                    center = sunCenter
+                )
+                val farHills = Path().apply {
+                    moveTo(0f, size.height * 0.72f)
+                    quadraticTo(size.width * 0.42f, size.height * 0.55f, size.width, size.height * 0.76f)
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+                drawPath(farHills, Color(0xFF9D8790).copy(alpha = 0.55f))
+                val nearHills = Path().apply {
+                    moveTo(0f, size.height * 0.84f)
+                    quadraticTo(size.width * 0.45f, size.height * 0.68f, size.width, size.height * 0.88f)
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+                drawPath(nearHills, Color(0xFF688C5D).copy(alpha = 0.65f))
+            }
+        }
         Box(
             Modifier
                 .align(Alignment.Center)
@@ -790,8 +815,9 @@ private fun GardenWindow(modifier: Modifier = Modifier) {
                 .height(GardenTokens.CompactInset)
                 .background(GardenWindowFrame)
         )
-        Box(
-            Modifier
+        if (activeBackground != "evening") {
+            Box(
+                Modifier
                 .align(Alignment.TopEnd)
                 .padding(
                     top = GardenTokens.WindowSunTopInset,
@@ -799,7 +825,8 @@ private fun GardenWindow(modifier: Modifier = Modifier) {
                 )
                 .size(GardenTokens.GardenWindowSunSize)
                 .background(GardenWindowSun, CircleShape)
-        )
+            )
+        }
         Row(
             modifier = Modifier.align(Alignment.CenterStart).padding(start = GardenTokens.LabelInset),
             horizontalArrangement = Arrangement.spacedBy(GardenTokens.TightInset)
