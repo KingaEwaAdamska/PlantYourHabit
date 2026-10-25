@@ -148,6 +148,12 @@ fun PlantYourHabitApp(
                     onSelectPlant = { habitId, plant ->
                         selectedPlants[habitId] = plant
                     },
+                    onCreateHabit = { habit ->
+                        if (habits.size < MAX_HABITS) {
+                            habits.add(habit)
+                            selectedPlants[habit.id] = habit.plant
+                        }
+                    },
                     onToggleHabit = { habit ->
                         val today = LocalDate.now()
                         val done = today.toString() in habit.careDays

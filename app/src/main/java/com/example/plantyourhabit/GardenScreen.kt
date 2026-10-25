@@ -27,6 +27,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -86,11 +87,13 @@ fun GardenScreen(
     selectedPlants: Map<Int, String>,
     availablePlants: List<String>,
     onSelectPlant: (Int, String) -> Unit,
+    onCreateHabit: (Habit) -> Unit,
     onToggleHabit: (Habit) -> Unit,
     onOpenShop: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var editingHabitId by remember { mutableStateOf<Int?>(null) }
+    var showAddHabitDialog by remember { mutableStateOf(false) }
     var today by remember { mutableStateOf(LocalDate.now()) }
     LaunchedEffect(Unit) {
         while (true) {
@@ -215,7 +218,7 @@ fun GardenScreen(
                     SoftActionButton(
                         text = "Add a habit",
                         modifier = Modifier.weight(1f),
-                        onClick = {},
+                        onClick = { showAddHabitDialog = true },
                         icon = R.drawable.ic_add
                     )
                 } else {
@@ -244,7 +247,53 @@ fun GardenScreen(
               )
           }
       }
+      if (showAddHabitDialog && habits.size < MAX_HABITS) {
+          AddHabitDialog(
+              onDismiss = { showAddHabitDialog = false },
+              onCreate = { name ->
+                  if (habits.size < MAX_HABITS) {
+                      val nextId = (habits.maxOfOrNull(Habit::id) ?: 0) + 1
+                      onCreateHabit(Habit(nextId, name, "sprout", 6))
+                  }
+                  showAddHabitDialog = false
+              }
+          )
+      }
     }
+}
+
+@Composable
+private fun AddHabitDialog(
+    onDismiss: () -> Unit,
+    onCreate: (String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add a habit") },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Habit name") },
+                singleLine = true
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onCreate(name.trim()) },
+                enabled = name.isNotBlank()
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
