@@ -35,8 +35,9 @@ object GardenTokens {
     val LargeInset = 14.dp
     val MicroPadding = 5.dp
     val NoElevation = 0.dp
-    val PaletteButtonSize = 27.dp
-    val PaletteIconSize = 15.dp
+    val PaletteButtonSize = 28.dp
+    val PaletteIconSize = 18.dp
+    val PaletteButtonBottomInset = 14.dp
     val PlantPickerPreviewHeight = 48.dp
     val PlantPreviewWidth = 38.dp
     val PlantRowHorizontalInset = 28.dp

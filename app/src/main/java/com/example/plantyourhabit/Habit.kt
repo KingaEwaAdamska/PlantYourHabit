@@ -13,7 +13,13 @@ data class Habit(
 const val MAX_HABITS = 3
 const val MAX_STREAK_DAY = 60
 const val STARTING_GOLD_BALANCE = 120
-const val GROWING_STAGE_START_DAY = 15
+const val GROWING_STAGE_START_DAY = 15data class Habit(
+    val id: Int,
+    val name: String,
+    val plant: String,
+    val reward: Int,
+    val careDays: List<String> = emptyList()
+)
 const val BUDDING_STAGE_START_DAY = 30
 const val BLOOMING_STAGE_START_DAY = 45
 const val NAV_SELECTION_ANIMATION_MILLIS = 400
@@ -35,5 +41,5 @@ fun exampleCareDays(streakDays: Int): List<String> {
 val initialHabits = listOf(
     Habit(1, "Morning water", "monstera", 6, exampleCareDays(1)),
     Habit(2, "Read 20 mins", "fern", 8, exampleCareDays(40)),
-    Habit(3, "Evening walk", "sprout", 10)
+    Habit(3, "Evening walk", "sprout", 10, exampleCareDays(40))
 )

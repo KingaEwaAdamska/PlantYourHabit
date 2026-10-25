@@ -684,8 +684,8 @@ private fun GardenPlant(
         )
         Surface(
             modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(top = GardenTokens.TinyInset, end = GardenTokens.Hairline)
+                .align(Alignment.BottomEnd)
+                .padding(bottom = GardenTokens.PaletteButtonBottomInset)
                 .size(GardenTokens.PaletteButtonSize)
                 .clickable(onClick = onEdit),
             shape = CircleShape,
