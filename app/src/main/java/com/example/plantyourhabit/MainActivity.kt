@@ -5,7 +5,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationDrawerItemDefaults
@@ -23,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,11 +37,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.res.painterResource
 import com.example.plantyourhabit.ui.theme.PlantYourHabitTheme
 import com.example.plantyourhabit.ui.theme.Green300
 import androidx.compose.ui.unit.dp
+import com.example.plantyourhabit.ui.theme.Green500
+import androidx.compose.foundation.Indication
+import androidx.compose.foundation.IndicationNodeFactory
+import androidx.compose.foundation.interaction.InteractionSource
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.node.DelegatableNode
+import androidx.compose.ui.node.DrawModifierNode
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,29 +79,23 @@ fun PlantYourHabitApp() {
     val navigationItemColors = NavigationSuiteDefaults.itemColors(
         navigationBarItemColors = NavigationBarItemDefaults.colors(
             indicatorColor = Color.Transparent,
+            selectedIconColor = colorScheme.primary,
+            unselectedIconColor = colorScheme.primary,
             selectedTextColor = colorScheme.primary,
             unselectedTextColor = colorScheme.primary
-        ),
-        navigationRailItemColors = NavigationRailItemDefaults.colors(
-            indicatorColor = Color.Transparent,
-            selectedTextColor = colorScheme.primary
-        ),
-        navigationDrawerItemColors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = Color.Transparent,
-            selectedTextColor = colorScheme.primary
         )
     )
 
     NavigationSuiteScaffold(
         navigationSuiteColors = NavigationSuiteDefaults.colors(
-            shortNavigationBarContainerColor = colorScheme.surface,
-            shortNavigationBarContentColor = colorScheme.onSurface,
-            navigationBarContainerColor = colorScheme.surface,
-            navigationBarContentColor = colorScheme.onSurface,
-            navigationRailContainerColor = colorScheme.surface,
-            navigationRailContentColor = colorScheme.onSurface,
-            navigationDrawerContainerColor = colorScheme.surface,
-            navigationDrawerContentColor = colorScheme.onSurface
+            shortNavigationBarContainerColor = Color.Transparent,
+            shortNavigationBarContentColor = Color.Transparent,
+            navigationBarContainerColor = Color.Transparent,
+            navigationBarContentColor = Color.Transparent,
+            navigationRailContainerColor = Color.Transparent,
+            navigationRailContentColor = Color.Transparent,
+            navigationDrawerContainerColor = Color.Transparent,
+            navigationDrawerContentColor = Color.Transparent
         ),
         navigationSuiteItems = {
             AppDestinations.entries.forEach {
@@ -166,6 +173,7 @@ fun PlantYourHabitApp() {
             }
         }
     }
+
 }
 
 enum class AppDestinations(
@@ -179,14 +187,26 @@ enum class AppDestinations(
 
 @Composable
 private fun DestinationNavigationIcon(destination: AppDestinations, selected: Boolean) {
+    val surfaceColor = MaterialTheme.colorScheme.surface
     val color by animateColorAsState(
-        targetValue = if (selected) Green300 else MaterialTheme.colorScheme.surface,
-        animationSpec = tween(durationMillis = 250),
+        targetValue = if (selected) Green300 else surfaceColor,
+        animationSpec = if (selected){
+                keyframes {
+                    durationMillis = 400
+
+                    surfaceColor at 0
+                    Green500 at 200
+                    Green300 at 400
+                }
+        } else {
+            tween(durationMillis = 400)
+        },
         label = "navigationSelection"
     )
     Box(
         modifier = Modifier
             .size(40.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(color, RectangleShape),
         contentAlignment = Alignment.Center
     ) {
