@@ -8,57 +8,58 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Green300,
-    onPrimary = Green900,
+    primary = Color(0xFFC1D0C4),
+    onPrimary = Color(0xFF26392F),
 
-    secondary = Green300,
-    onSecondary = Green900,
+    secondary = Color(0xFFC1D0C4),
+    onSecondary = Color(0xFF26392F),
 
     tertiary = Terracotta300,
-    onTertiary = Green900,
+    onTertiary = Color(0xFF26392F),
 
-    background = Green900,
-    onBackground = CreamBackground,
+    background = Color(0xFF202224),
+    onBackground = Color(0xFFE9E9E5),
 
-    surface = Color(0xFF30483A),
-    onSurface = CreamBackground,
+    surface = Color(0xFF2B2E30),
+    onSurface = Color(0xFFE9E9E5),
 
-    surfaceVariant = Color(0xFF3B604D),
-    onSurfaceVariant = Green200,
+    surfaceVariant = Color(0xFF3A3E40),
+    onSurfaceVariant = Color(0xFFD8DDD8),
 
-    outline = Color(0xFF68806D),
-    outlineVariant = Color(0xFF496454),
+    outline = DarkThemeOutline,
+    outlineVariant = DarkThemeOutlineVariant,
 
     error = Terracotta300,
-    onError = Green900,
+    onError = Color(0xFF26392F),
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Green900,
+    primary = Color(0xFF26392F),
     onPrimary = Color.White,
 
-    primaryContainer = Green200,
+    primaryContainer = Color(0xFFDCE8D9),
 
-    secondary = Gold100,
-    onSecondary = Gold700,
+    secondary = Color(0xFFF7E6B4),
+    onSecondary = Color(0xFF8D6424),
 
     tertiary = Terracotta600,
     onTertiary = Color.White,
 
-    background = CreamBackground,
-    onBackground = Green900,
+    background = Color(0xFFF8F5ED),
+    onBackground = Color(0xFF26392F),
 
-    surface = CreamSurface,
-    onSurface = Green900,
+    surface = Color(0xFFFFFDF8),
+    onSurface = Color(0xFF26392F),
 
-    surfaceVariant = Green100,
-    onSurfaceVariant = Green700,
+    surfaceVariant = Color(0xFFEDF2E8),
+    onSurfaceVariant = Color(0xFF496454),
 
-    outline = Color(0xFFB9C4BA),
+    outline = PlantCardBorder,
     outlineVariant = BorderColor,
 
     error = Terracotta700,
@@ -82,9 +83,11 @@ fun PlantYourHabitTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    CompositionLocalProvider(LocalAppDarkTheme provides darkTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

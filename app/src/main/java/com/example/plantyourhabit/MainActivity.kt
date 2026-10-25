@@ -1,5 +1,7 @@
 package com.example.plantyourhabit
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,8 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,18 +40,43 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.dp
-import com.example.plantyourhabit.ui.theme.Green300
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.core.view.WindowCompat
 import com.example.plantyourhabit.ui.theme.Green500
+import com.example.plantyourhabit.ui.theme.Green300
 import com.example.plantyourhabit.ui.theme.PlantYourHabitTheme
+import java.time.LocalDate
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PlantYourHabitTheme {
-                PlantYourHabitApp()
+            val context = LocalContext.current
+            val preferences = remember {
+                context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            }
+            val systemDarkTheme = isSystemInDarkTheme()
+            var darkTheme by rememberSaveable {
+                mutableStateOf(preferences.getBoolean("dark_theme", systemDarkTheme))
+            }
+            PlantYourHabitTheme(darkTheme = darkTheme) {
+                val view = LocalView.current
+                SideEffect {
+                    val window = (context as Activity).window
+                    val controller = WindowCompat.getInsetsController(window, view)
+                    controller.isAppearanceLightStatusBars = !darkTheme
+                    controller.isAppearanceLightNavigationBars = !darkTheme
+                }
+                PlantYourHabitApp(
+                    darkTheme = darkTheme,
+                    onToggleTheme = {
+                        darkTheme = !darkTheme
+                        preferences.edit().putBoolean("dark_theme", darkTheme).apply()
+                    }
+                )
             }
         }
     }
@@ -55,16 +84,26 @@ class MainActivity : ComponentActivity() {
 
 @PreviewScreenSizes
 @Composable
-fun PlantYourHabitApp() {
+fun PlantYourHabitApp(
+    darkTheme: Boolean = false,
+    onToggleTheme: () -> Unit = {}
+) {
     var currentDestination by rememberSaveable {
         mutableStateOf(AppDestinations.GARDEN)
     }
-    var gold by rememberSaveable { mutableStateOf(120) }
-    var completedHabits by remember { mutableStateOf(setOf(1)) }
+    var gold by rememberSaveable { mutableStateOf(STARTING_GOLD_BALANCE) }
+    val habits = remember {
+        mutableStateListOf<Habit>().apply {
+            addAll(initialHabits)
+        }
+    }
     var completedQuests by remember { mutableStateOf(setOf<Int>()) }
 
     val ownedTrinkets = remember { mutableStateListOf<Int>() }
     val ownedPlants = remember { mutableStateListOf<String>() }
+    val selectedPlants = remember {
+        mutableStateMapOf(1 to "monstera", 2 to "fern", 3 to "sprout")
+    }
     val ownedBackgrounds = remember {
         mutableStateListOf("classic")
     }
@@ -91,25 +130,36 @@ fun PlantYourHabitApp() {
         ) {
             AppHeader(
                 destination = currentDestination,
-                gold = gold
+                gold = gold,
+                darkTheme = darkTheme,
+                onToggleTheme = onToggleTheme
             )
 
             when (currentDestination) {
                 AppDestinations.GARDEN -> GardenScreen(
-                    completedHabits = completedHabits,
+                    habits = habits,
+                    ownedTrinkets = ownedTrinkets,
                     activeBackground = activeBackground,
-                    onToggleHabit = { id, reward ->
-                        val done = completedHabits.contains(id)
-
-                        completedHabits =
-                            if (done) {
-                                completedHabits - id
-                            } else {
-                                completedHabits + id
-                            }
+                    selectedPlants = selectedPlants,
+                    availablePlants = listOf("monstera", "fern", "sprout") + ownedPlants,
+                    onSelectPlant = { habitId, plant ->
+                        selectedPlants[habitId] = plant
+                    },
+                    onToggleHabit = { habit ->
+                        val today = LocalDate.now()
+                        val done = today.toString() in habit.careDays
+                        val updatedHabit = if (done) {
+                            habit.removeToday(today)
+                        } else {
+                            habit.addToday(today)
+                        }
+                        val habitIndex = habits.indexOfFirst { it.id == habit.id }
+                        if (habitIndex >= 0) {
+                            habits[habitIndex] = updatedHabit
+                        }
 
                         gold = (
-                                gold + if (done) -reward else reward
+                                gold + if (done) -habit.reward else habit.reward
                                 ).coerceAtLeast(0)
                     },
                     onOpenShop = {
@@ -174,7 +224,7 @@ private fun CustomNavigationBar(
         modifier = Modifier
             .fillMaxWidth()
             .background(colorScheme.surface)
-            .padding(vertical = 8.dp),
+            .padding(vertical = AppTokens.StandardInset),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -193,13 +243,14 @@ private fun CustomNavigationBar(
                     ) {
                         onDestinationSelected(destination)
                     }
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = AppTokens.CompactInset),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 DestinationNavigationIcon(
                     destination = destination,
-                    selected = selected
+                    selected = selected,
+                    darkTheme = MaterialTheme.colorScheme.background == Color(0xFF202224)
                 )
 
                 Text(
@@ -224,30 +275,37 @@ enum class AppDestinations(
 @Composable
 private fun DestinationNavigationIcon(
     destination: AppDestinations,
-    selected: Boolean
+    selected: Boolean,
+    darkTheme: Boolean
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     val color by animateColorAsState(
-        targetValue = if (selected) Green300 else Color.Transparent,
+        targetValue = if (selected) {
+            if (darkTheme) {
+                Color(0xFF496454)
+            } else {
+                com.example.plantyourhabit.ui.theme.Green300
+            }
+        } else Color.Transparent,
         animationSpec = if (selected) {
             keyframes {
-                durationMillis = 400
+                durationMillis = NAV_SELECTION_ANIMATION_MILLIS
 
                 surfaceColor at 0
-                Green500 at 200
-                Green300 at 400
+                Green500 at NAV_SELECTION_MIDPOINT_MILLIS
+                Green300 at NAV_SELECTION_ANIMATION_MILLIS
             }
         } else {
-            tween(durationMillis = 400)
+            tween(durationMillis = NAV_SELECTION_ANIMATION_MILLIS)
         },
         label = "navigationSelection"
     )
 
     Box(
         modifier = Modifier
-            .size(40.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .size(AppTokens.NavigationIconSize)
+            .clip(RoundedCornerShape(AppTokens.NavigationIconCornerRadius))
             .background(color, RectangleShape),
         contentAlignment = Alignment.Center
     ) {
