@@ -147,69 +147,17 @@ fun GardenScreen(
                     .fillMaxWidth()
                     .background(backdrop)
             ) {
-                val levelHeight = maxHeight / habits.size
-                GardenWindow(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 12.dp, end = 14.dp)
+                GardenShelf(
+                    backdrop = backdrop,
+                    modifier = Modifier.fillMaxSize()
                 )
-                Column(Modifier.fillMaxSize()) {
-                    habits.forEachIndexed { index, habit ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth()
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.Center)
-                                    .padding(horizontal = 28.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                if (index % 2 == 1) {
-                                    GardenPlant(habit.plant, Modifier.size(105.dp, levelHeight))
-                                    ShelfHabitCard(
-                                        habit = habit,
-                                        done = habit.id in completedHabits,
-                                        onClick = { onToggleHabit(habit.id, habit.reward) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                } else {
-                                    ShelfHabitCard(
-                                        habit = habit,
-                                        done = habit.id in completedHabits,
-                                        onClick = { onToggleHabit(habit.id, habit.reward) },
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    GardenPlant(habit.plant, Modifier.size(105.dp, levelHeight))
-                                }
-                            }
-                            if (index < habits.lastIndex) {
-                                ShelfPlank(Modifier.align(Alignment.BottomCenter))
-                            }
-                        }
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .fillMaxHeight()
-                        .padding(start = 19.dp, top = 14.dp, bottom = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ShelfPost(Modifier.fillMaxHeight())
-                }
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .fillMaxHeight()
-                        .padding(end = 19.dp, top = 14.dp, bottom = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    ShelfPost(Modifier.fillMaxHeight())
-                }
+                GardenPlants(
+                    habits = habits.take(MAX_HABITS),
+                    completedHabits = completedHabits,
+                    onToggleHabit = onToggleHabit,
+                    levelHeight = maxHeight / MAX_HABITS,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Row(
                 modifier = Modifier
@@ -233,6 +181,85 @@ fun GardenScreen(
                     )
                 }
 
+            }
+        }
+    }
+}
+
+@Composable
+private fun GardenShelf(backdrop: Color, modifier: Modifier = Modifier) {
+    Box(modifier.background(backdrop)) {
+        GardenWindow(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(top = 12.dp, end = 14.dp)
+        )
+        Column(Modifier.fillMaxSize()) {
+            repeat(MAX_HABITS) { level ->
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    if (level < MAX_HABITS) {
+                        ShelfPlank(Modifier.align(Alignment.BottomCenter))
+                    }
+                }
+            }
+        }
+        ShelfPost(
+            Modifier
+                .align(Alignment.CenterStart)
+                .fillMaxHeight()
+                .padding(start = 19.dp, top = 14.dp, bottom = 12.dp)
+        )
+        ShelfPost(
+            Modifier
+                .align(Alignment.CenterEnd)
+                .fillMaxHeight()
+                .padding(end = 19.dp, top = 14.dp, bottom = 12.dp)
+        )
+    }
+}
+
+@Composable
+private fun GardenPlants(
+    habits: List<Habit>,
+    completedHabits: Set<Int>,
+    onToggleHabit: (Int, Int) -> Unit,
+    levelHeight: androidx.compose.ui.unit.Dp,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier) {
+        repeat(MAX_HABITS) { index ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                habits.getOrNull(index)?.let { habit ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                            .padding(horizontal = 28.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (index % 2 == 0) {
+                            ShelfHabitCard(
+                                habit = habit,
+                                done = habit.id in completedHabits,
+                                onClick = { onToggleHabit(habit.id, habit.reward) },
+                                modifier = Modifier.weight(1f)
+                            )
+                            GardenPlant(habit.plant, Modifier.size(105.dp, levelHeight))
+                        } else {
+                            GardenPlant(habit.plant, Modifier.size(105.dp, levelHeight))
+                            ShelfHabitCard(
+                                habit = habit,
+                                done = habit.id in completedHabits,
+                                onClick = { onToggleHabit(habit.id, habit.reward) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -352,13 +379,13 @@ private fun ShelfPlant(type: String, modifier: Modifier = Modifier) {
 private fun ShelfPost(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .width(10.dp)
+            .width(15.dp)
             .background(Color(0xFF815438), RoundedCornerShape(5.dp))
     ) {
         Box(
             modifier = Modifier
                 .fillMaxHeight()
-                .width(4.dp)
+                .width(6.dp)
                 .align(Alignment.CenterStart)
                 .background(Color(0xFFA56F48), RoundedCornerShape(4.dp))
         )
@@ -369,6 +396,7 @@ private fun ShelfPost(modifier: Modifier = Modifier) {
 private fun ShelfPlank(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .fillMaxWidth()
             .height(15.dp)
             .background(Color(0xFF865738), RoundedCornerShape(4.dp))
