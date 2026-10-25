@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -156,6 +157,7 @@ fun GardenScreen(
                     completedHabits = completedHabits,
                     onToggleHabit = onToggleHabit,
                     levelHeight = maxHeight / MAX_HABITS,
+                    bottomShelfInset = 12.dp,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -188,7 +190,8 @@ fun GardenScreen(
 
 @Composable
 private fun GardenShelf(backdrop: Color, modifier: Modifier = Modifier) {
-    Box(modifier.background(backdrop)) {
+    BoxWithConstraints(modifier.background(backdrop)) {
+        val postTopPadding = maxHeight / MAX_HABITS - 19.dp
         GardenWindow(
             modifier = Modifier
                 .align(Alignment.TopEnd)
@@ -197,8 +200,14 @@ private fun GardenShelf(backdrop: Color, modifier: Modifier = Modifier) {
         Column(Modifier.fillMaxSize()) {
             repeat(MAX_HABITS) { level ->
                 Box(Modifier.weight(1f).fillMaxWidth()) {
-                    if (level < MAX_HABITS) {
+                    if (level < MAX_HABITS - 1) {
                         ShelfPlank(Modifier.align(Alignment.BottomCenter))
+                    } else {
+                        ShelfPlank(
+                            Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(bottom = 12.dp)
+                        )
                     }
                 }
             }
@@ -207,13 +216,13 @@ private fun GardenShelf(backdrop: Color, modifier: Modifier = Modifier) {
             Modifier
                 .align(Alignment.CenterStart)
                 .fillMaxHeight()
-                .padding(start = 19.dp, top = 14.dp, bottom = 12.dp)
+                .padding(start = 19.dp, top = postTopPadding - 10.dp)
         )
         ShelfPost(
             Modifier
                 .align(Alignment.CenterEnd)
                 .fillMaxHeight()
-                .padding(end = 19.dp, top = 14.dp, bottom = 12.dp)
+                .padding(end = 19.dp, top = postTopPadding- 10.dp)
         )
     }
 }
@@ -224,6 +233,7 @@ private fun GardenPlants(
     completedHabits: Set<Int>,
     onToggleHabit: (Int, Int) -> Unit,
     levelHeight: androidx.compose.ui.unit.Dp,
+    bottomShelfInset: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier
 ) {
     Column(modifier) {
@@ -234,6 +244,8 @@ private fun GardenPlants(
                     .fillMaxWidth()
             ) {
                 habits.getOrNull(index)?.let { habit ->
+                    val plankOffset = 15.dp +
+                        if (index == MAX_HABITS - 1) bottomShelfInset else 0.dp
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -248,9 +260,19 @@ private fun GardenPlants(
                                 onClick = { onToggleHabit(habit.id, habit.reward) },
                                 modifier = Modifier.weight(1f)
                             )
-                            GardenPlant(habit.plant, Modifier.size(105.dp, levelHeight))
+                            GardenPlant(
+                                habit.plant,
+                                Modifier
+                                    .size(105.dp, levelHeight)
+                                    .offset(y = -plankOffset)
+                            )
                         } else {
-                            GardenPlant(habit.plant, Modifier.size(105.dp, levelHeight))
+                            GardenPlant(
+                                habit.plant,
+                                Modifier
+                                    .size(105.dp, levelHeight)
+                                    .offset(y = -plankOffset)
+                            )
                             ShelfHabitCard(
                                 habit = habit,
                                 done = habit.id in completedHabits,
@@ -366,8 +388,8 @@ private fun ShelfPlant(type: String, modifier: Modifier = Modifier) {
         val pot = Path().apply {
             moveTo(w * .31f, h * .78f)
             lineTo(w * .69f, h * .78f)
-            lineTo(w * .64f, h * .96f)
-            lineTo(w * .36f, h * .96f)
+            lineTo(w * .64f, h)
+            lineTo(w * .36f, h)
             close()
         }
         drawPath(pot, Color(0xFFB8734F))
@@ -413,7 +435,12 @@ private fun ShelfPlank(modifier: Modifier = Modifier) {
 @Composable
 private fun GardenPlant(type: String, modifier: Modifier = Modifier) {
     Box(modifier, contentAlignment = Alignment.BottomCenter) {
-        ShelfPlant(type, Modifier.fillMaxSize())
+        ShelfPlant(
+            type,
+            Modifier
+                .fillMaxSize()
+                .padding(start = 6.dp, end = 6.dp, top = 10.dp)
+        )
         Surface(
             modifier = Modifier
                 .align(Alignment.TopEnd)
