@@ -27,4 +27,5 @@ object AppTokens {
     val SoftActionButtonHeight = 40.dp
     val StandardInset = 8.dp
     val SupportingText = 10.sp
+    val ThemeToggleSize = 38.dp
 }

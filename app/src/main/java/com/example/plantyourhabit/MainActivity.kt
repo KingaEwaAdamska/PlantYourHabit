@@ -1,5 +1,7 @@
 package com.example.plantyourhabit
 
+import android.app.Activity
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -23,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
@@ -37,8 +40,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import com.example.plantyourhabit.ui.theme.Green300
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.core.view.WindowCompat
 import com.example.plantyourhabit.ui.theme.Green500
+import com.example.plantyourhabit.ui.theme.Green300
 import com.example.plantyourhabit.ui.theme.PlantYourHabitTheme
 import java.time.LocalDate
 
@@ -47,8 +54,29 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            PlantYourHabitTheme {
-                PlantYourHabitApp()
+            val context = LocalContext.current
+            val preferences = remember {
+                context.getSharedPreferences("app_settings", Context.MODE_PRIVATE)
+            }
+            val systemDarkTheme = isSystemInDarkTheme()
+            var darkTheme by rememberSaveable {
+                mutableStateOf(preferences.getBoolean("dark_theme", systemDarkTheme))
+            }
+            PlantYourHabitTheme(darkTheme = darkTheme) {
+                val view = LocalView.current
+                SideEffect {
+                    val window = (context as Activity).window
+                    val controller = WindowCompat.getInsetsController(window, view)
+                    controller.isAppearanceLightStatusBars = !darkTheme
+                    controller.isAppearanceLightNavigationBars = !darkTheme
+                }
+                PlantYourHabitApp(
+                    darkTheme = darkTheme,
+                    onToggleTheme = {
+                        darkTheme = !darkTheme
+                        preferences.edit().putBoolean("dark_theme", darkTheme).apply()
+                    }
+                )
             }
         }
     }
@@ -56,7 +84,10 @@ class MainActivity : ComponentActivity() {
 
 @PreviewScreenSizes
 @Composable
-fun PlantYourHabitApp() {
+fun PlantYourHabitApp(
+    darkTheme: Boolean = false,
+    onToggleTheme: () -> Unit = {}
+) {
     var currentDestination by rememberSaveable {
         mutableStateOf(AppDestinations.GARDEN)
     }
@@ -99,7 +130,9 @@ fun PlantYourHabitApp() {
         ) {
             AppHeader(
                 destination = currentDestination,
-                gold = gold
+                gold = gold,
+                darkTheme = darkTheme,
+                onToggleTheme = onToggleTheme
             )
 
             when (currentDestination) {
@@ -216,7 +249,8 @@ private fun CustomNavigationBar(
             ) {
                 DestinationNavigationIcon(
                     destination = destination,
-                    selected = selected
+                    selected = selected,
+                    darkTheme = MaterialTheme.colorScheme.background == Color(0xFF202224)
                 )
 
                 Text(
@@ -241,12 +275,19 @@ enum class AppDestinations(
 @Composable
 private fun DestinationNavigationIcon(
     destination: AppDestinations,
-    selected: Boolean
+    selected: Boolean,
+    darkTheme: Boolean
 ) {
     val surfaceColor = MaterialTheme.colorScheme.surface
 
     val color by animateColorAsState(
-        targetValue = if (selected) Green300 else Color.Transparent,
+        targetValue = if (selected) {
+            if (darkTheme) {
+                Color(0xFF496454)
+            } else {
+                com.example.plantyourhabit.ui.theme.Green300
+            }
+        } else Color.Transparent,
         animationSpec = if (selected) {
             keyframes {
                 durationMillis = NAV_SELECTION_ANIMATION_MILLIS

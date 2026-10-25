@@ -52,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import com.example.plantyourhabit.ui.theme.BeigeMedium
+import com.example.plantyourhabit.ui.theme.SunroomGardenBackdrop
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
 import com.example.plantyourhabit.ui.theme.Gold100
@@ -75,6 +76,7 @@ import com.example.plantyourhabit.ui.theme.GardenWindowFrame
 import com.example.plantyourhabit.ui.theme.GardenWindowGlass
 import com.example.plantyourhabit.ui.theme.GardenWindowSun
 import com.example.plantyourhabit.ui.theme.BeigeLight
+import com.example.plantyourhabit.ui.theme.LocalAppDarkTheme
 
 @Composable
 fun GardenScreen(
@@ -97,8 +99,12 @@ fun GardenScreen(
         }
     }
     val progress = habits.count { today.toString() in it.careDays }
+    val isDarkTheme = LocalAppDarkTheme.current
+    val gardenHeaderBackground = if (isDarkTheme) Color(0xFF191B1D) else Green800
+    val gardenHeaderText = if (isDarkTheme) Color(0xFFF1F2EE) else CreamBackground
+    val gardenHeaderSupportingText = if (isDarkTheme) Color(0xFFC1C7C3) else Green200
     val backdropBrush = when (activeBackground) {
-        "sunroom" -> Brush.verticalGradient(listOf(BeigeMedium, BeigeMedium))
+        "sunroom" -> Brush.verticalGradient(listOf(SunroomGardenBackdrop, SunroomGardenBackdrop))
         "evening" -> Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
         "forest" -> Brush.verticalGradient(listOf(ForestGardenBackdrop, ForestGardenBackdrop))
         else -> Brush.verticalGradient(listOf(Green300, Green300))
@@ -120,7 +126,7 @@ fun GardenScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Green800)
+                    .background(gardenHeaderBackground)
                     .padding(horizontal = GardenTokens.SectionInset, vertical = GardenTokens.LargeInset)
             ) {
                 Row(
@@ -131,7 +137,7 @@ fun GardenScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = if (progress == habits.size) "Everything is blooming!" else "Your growing collection",
-                            color = CreamBackground,
+                            color = gardenHeaderText,
                             fontFamily = FontFamily.Serif,
                             fontSize = GardenTokens.GardenTitleText,
                             lineHeight = GardenTokens.LargeBodyText,
@@ -139,6 +145,7 @@ fun GardenScreen(
                         )
                     }
                     Box(contentAlignment = Alignment.Center) {
+                        val progressRingColor = Gold100
                         Canvas(modifier = Modifier.size(GardenTokens.GardenProgressRingSize)) {
                             drawArc(
                                 color = Green300.copy(alpha = .35f),
@@ -148,7 +155,7 @@ fun GardenScreen(
                                 style = Stroke(width = GardenTokens.TightInset.toPx())
                             )
                             drawArc(
-                                color = Gold100,
+                                color = progressRingColor,
                                 startAngle = -90f,
                                 sweepAngle = PROGRESS_CIRCLE_DEGREES * progress / habits.size,
                                 useCenter = false,
@@ -157,7 +164,7 @@ fun GardenScreen(
                         }
                         Text(
                             "$progress/${habits.size}",
-                            color = CreamBackground,
+                            color = gardenHeaderText,
                             fontWeight = FontWeight.Bold,
                             fontSize = GardenTokens.CaptionText
                         )
@@ -166,7 +173,7 @@ fun GardenScreen(
                 Text(
                     if (progress == habits.size) "All daily care finished" else "Care for your plants daily to build a streak up to $MAX_STREAK_DAY days.",
                     modifier = Modifier.padding(top = GardenTokens.CompactInset),
-                    color = Green200,
+                    color = gardenHeaderSupportingText,
                     fontSize = GardenTokens.SupportingText
                 )
             }
@@ -422,12 +429,15 @@ private fun ShelfHabitCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isDarkTheme = LocalAppDarkTheme.current
+    val habitCardBackground = if (isDarkTheme) Color(0xFF3A3D3F) else CreamSurface
+
     Surface(
         modifier = modifier
             .clickable(onClick = onClick)
             .padding(vertical = GardenTokens.SmallInset),
         shape = RoundedCornerShape(GardenTokens.HabitCardCornerRadius),
-        color = CreamSurface,
+        color = habitCardBackground,
         shadowElevation = GardenTokens.TightInset
     ) {
         Row(
@@ -460,7 +470,7 @@ private fun ShelfHabitCard(
             Surface(
                 modifier = Modifier.size(GardenTokens.HabitCompletionControlSize),
                 shape = CircleShape,
-                color = if (done) Green700 else CreamSurface,
+                color = if (done) Green700 else habitCardBackground,
                 border = androidx.compose.foundation.BorderStroke(GardenTokens.Hairline, if (done) Green700 else PlantCardBorder)
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -843,10 +853,10 @@ private fun GardenWindow(activeBackground: String, modifier: Modifier = Modifier
         bottomStart = GardenTokens.TinyInset,
         bottomEnd = GardenTokens.TinyInset
     )
-    val windowSky = if (activeBackground == "evening") {
-        Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
-    } else {
-        Brush.verticalGradient(listOf(GardenWindowGlass, GardenWindowGlass))
+    val windowSky = when (activeBackground) {
+        "evening" -> Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
+        "forest" -> Brush.verticalGradient(listOf(Color(0xFFB9C9B1), Color(0xFF6F8B70)))
+        else -> Brush.verticalGradient(listOf(GardenWindowGlass, GardenWindowGlass))
     }
     Box(
         modifier = modifier
@@ -881,6 +891,37 @@ private fun GardenWindow(activeBackground: String, modifier: Modifier = Modifier
                 }
                 drawPath(nearHills, Color(0xFF688C5D).copy(alpha = 0.65f))
             }
+        } else if (activeBackground == "forest") {
+            Canvas(Modifier.fillMaxSize()) {
+                val farForest = Path().apply {
+                    moveTo(0f, size.height * 0.68f)
+                    lineTo(size.width * 0.18f, size.height * 0.26f)
+                    lineTo(size.width * 0.36f, size.height * 0.68f)
+                    lineTo(size.width * 0.53f, size.height * 0.2f)
+                    lineTo(size.width * 0.75f, size.height * 0.68f)
+                    lineTo(size.width * 0.9f, size.height * 0.32f)
+                    lineTo(size.width, size.height * 0.62f)
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+                drawPath(farForest, Color(0xFF789276).copy(alpha = 0.72f))
+
+                val nearForest = Path().apply {
+                    moveTo(0f, size.height * 0.82f)
+                    lineTo(size.width * 0.13f, size.height * 0.45f)
+                    lineTo(size.width * 0.27f, size.height * 0.82f)
+                    lineTo(size.width * 0.43f, size.height * 0.4f)
+                    lineTo(size.width * 0.61f, size.height * 0.82f)
+                    lineTo(size.width * 0.79f, size.height * 0.46f)
+                    lineTo(size.width * 0.96f, size.height * 0.82f)
+                    lineTo(size.width, size.height * 0.76f)
+                    lineTo(size.width, size.height)
+                    lineTo(0f, size.height)
+                    close()
+                }
+                drawPath(nearForest, Color(0xFF496454).copy(alpha = 0.88f))
+            }
         }
         Box(
             Modifier
@@ -896,7 +937,7 @@ private fun GardenWindow(activeBackground: String, modifier: Modifier = Modifier
                 .height(GardenTokens.CompactInset)
                 .background(GardenWindowFrame)
         )
-        if (activeBackground != "evening") {
+        if (activeBackground != "evening" && activeBackground != "forest") {
             Box(
                 Modifier
                 .align(Alignment.TopEnd)

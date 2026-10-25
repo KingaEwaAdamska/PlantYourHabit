@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.BeigeMedium
+import com.example.plantyourhabit.ui.theme.SunroomGardenBackdrop
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
 import com.example.plantyourhabit.ui.theme.Gold100
@@ -48,6 +49,11 @@ import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextMuted
 import com.example.plantyourhabit.ui.theme.TextSecondary
 import com.example.plantyourhabit.ui.theme.ShopDisplayBase
+import com.example.plantyourhabit.ui.theme.LocalAppDarkTheme
+
+private val DarkShopCardSurface = Color(0xFF373B3D)
+private val DarkShopCardOwned = Color(0xFF454B48)
+private val DarkShopIconSurface = Color(0xFF747876)
 
 private enum class ShopArt(val drawable: Int) {
     MUSHROOM(R.drawable.ic_shop_mushroom),
@@ -118,32 +124,6 @@ fun ShopScreen(
     ) {
         item {
             Column(modifier = Modifier.fillMaxWidth()) {
-        Card(
-            shape = RoundedCornerShape(ShopTokens.LargeCardRadius),
-            colors = CardDefaults.cardColors(containerColor = BeigeMedium)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ShopTokens.ShopIllustrationHeight),
-                contentAlignment = Alignment.Center
-            ) {
-                ShopArtwork(ShopArt.LANTERN, Modifier.align(Alignment.TopStart).padding(ShopTokens.ShopStarInnerInset).size(ShopTokens.QuestHeroText.value.dp))
-                ShopArtwork(ShopArt.LANTERN, Modifier.align(Alignment.TopEnd).padding(ShopTokens.ShopStarOuterInset).size(ShopTokens.NavigationTitleText.value.dp))
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = ShopTokens.ProductDecorationInset)
-                        .background(ShopDisplayBase, CircleShape)
-                        .padding(horizontal = ShopTokens.ShopArtworkHorizontalPadding, vertical = ShopTokens.ContentInset),
-                    verticalAlignment = Alignment.Bottom
-                ) {
-                    ShopArtwork(ShopArt.MUSHROOM, Modifier.size(ShopTokens.ShopPlantPreviewSize))
-                    Spacer(Modifier.width(ShopTokens.LargeSpacing))
-                    ShopArtwork(ShopArt.SNAIL, Modifier.size(ShopTokens.ShopPlantPreviewSize))
-                }
-            }
-        }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -233,19 +213,6 @@ fun ShopScreen(
                 )
             }
         }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = ShopTokens.SectionInset),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ShopArtwork(ShopArt.LANTERN, Modifier.size(ShopTokens.SupportingText.value.dp))
-            Text(
-                "  New treasures arrive every Sunday",
-                color = TextMuted,
-                fontSize = ShopTokens.SupportingText
-            )
-        }
     }
 }
 }
@@ -262,7 +229,9 @@ private fun ProductCard(
     Surface(
         modifier = modifier.clickable(enabled = !owned && canAfford, onClick = onClick),
         shape = RoundedCornerShape(ShopTokens.ShopCardRadius),
-        color = if (owned) Green100 else CreamSurface
+        color = if (LocalAppDarkTheme.current) {
+            if (owned) DarkShopCardOwned else DarkShopCardSurface
+        } else if (owned) Green100 else CreamSurface
     ) {
         Column(
             modifier = Modifier.padding(ShopTokens.StandardInset),
@@ -272,7 +241,10 @@ private fun ProductCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(ShopTokens.ShopProductPreviewHeight)
-                    .background(BeigeBackground, RoundedCornerShape(ShopTokens.ShopProductPreviewCornerRadius)),
+                    .background(
+                        if (LocalAppDarkTheme.current) DarkShopIconSurface else BeigeBackground,
+                        RoundedCornerShape(ShopTokens.ShopProductPreviewCornerRadius)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 ShopArtwork(product.art, Modifier.fillMaxSize().padding(ShopTokens.SmallInset))
@@ -311,7 +283,9 @@ private fun ShopListRow(
             .fillMaxWidth()
             .clickable(enabled = owned || canAfford, onClick = onClick),
         shape = RoundedCornerShape(ShopTokens.ShopCardRadius),
-        color = if (owned) Green100 else CreamSurface
+        color = if (LocalAppDarkTheme.current) {
+            if (owned) DarkShopCardOwned else DarkShopCardSurface
+        } else if (owned) Green100 else CreamSurface
     ) {
         Row(
             modifier = Modifier.padding(ShopTokens.ComfortableInset),
@@ -320,7 +294,10 @@ private fun ShopListRow(
             Box(
                 modifier = Modifier
                     .size(ShopTokens.ShopPlantPreviewSize)
-                    .background(Green100, RoundedCornerShape(ShopTokens.ShopPlantPreviewCornerRadius)),
+                    .background(
+                        if (LocalAppDarkTheme.current) DarkShopIconSurface else Green100,
+                        RoundedCornerShape(ShopTokens.ShopPlantPreviewCornerRadius)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 ShopArtwork(art, Modifier.fillMaxSize().padding(ShopTokens.SmallInset))
@@ -356,14 +333,16 @@ private fun BackgroundCard(
     val isActive = activeBackground == backgroundKey(product.id)
     val previewColor = when (product.id) {
         1 -> Green300
-        2 -> BeigeMedium
+        2 -> SunroomGardenBackdrop
         3 -> EveningGardenBackdrop
         else -> ForestGardenBackdrop
     }
     Surface(
         modifier = modifier.clickable(enabled = owned || canAfford, onClick = onClick),
         shape = RoundedCornerShape(ShopTokens.ShopBackgroundCardCornerRadius),
-        color = if (isActive) Green100 else CreamSurface,
+        color = if (LocalAppDarkTheme.current) {
+            if (isActive) DarkShopCardOwned else DarkShopCardSurface
+        } else if (isActive) Green100 else CreamSurface,
         shadowElevation = if (isActive) ShopTokens.TinyInset else ShopTokens.NoElevation
     ) {
         Column(modifier = Modifier.padding(ShopTokens.SmallInset)) {

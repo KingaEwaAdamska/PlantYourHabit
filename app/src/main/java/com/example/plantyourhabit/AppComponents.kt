@@ -2,6 +2,7 @@ package com.example.plantyourhabit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -19,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontFamily
@@ -35,7 +38,12 @@ import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextSecondary
 
 @Composable
-fun AppHeader(destination: AppDestinations, gold: Int) {
+fun AppHeader(
+    destination: AppDestinations,
+    gold: Int,
+    darkTheme: Boolean,
+    onToggleTheme: () -> Unit
+) {
     val today = SimpleDateFormat("EEEE, d MMMM", Locale.getDefault())
         .format(Date())
         .uppercase(Locale.getDefault())
@@ -67,21 +75,40 @@ fun AppHeader(destination: AppDestinations, gold: Int) {
                 fontWeight = FontWeight.SemiBold
             )
         }
-        Surface(
-            shape = RoundedCornerShape(AppTokens.CurrencyPillRadius),
-            color = Gold100
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = AppTokens.CardInset, vertical = AppTokens.ComfortableInset),
-                verticalAlignment = Alignment.CenterVertically
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Surface(
+                shape = RoundedCornerShape(AppTokens.CurrencyPillRadius),
+                color = Gold100
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = AppTokens.CardInset, vertical = AppTokens.ComfortableInset),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_gold_coin),
+                        contentDescription = "Gold",
+                        modifier = Modifier.height(AppTokens.CurrencyText.value.dp)
+                    )
+                    Spacer(Modifier.width(AppTokens.SmallInset))
+                    Text("$gold", color = Gold700, fontWeight = FontWeight.Bold, fontSize = AppTokens.CardTitleText)
+                }
+            }
+            Spacer(Modifier.width(AppTokens.SmallInset))
+            Surface(
+                modifier = Modifier
+                    .size(AppTokens.ThemeToggleSize)
+                    .clip(RoundedCornerShape(AppTokens.CurrencyPillRadius))
+                    .clickable(onClick = onToggleTheme),
+                shape = RoundedCornerShape(AppTokens.CurrencyPillRadius),
+                color = CreamSurface
             ) {
                 Image(
-                    painter = painterResource(R.drawable.ic_gold_coin),
-                    contentDescription = "Gold",
-                    modifier = Modifier.height(AppTokens.CurrencyText.value.dp)
+                    painter = painterResource(
+                        if (darkTheme) R.drawable.ic_theme_sun else R.drawable.ic_theme_moon
+                    ),
+                    contentDescription = if (darkTheme) "Switch to light mode" else "Switch to dark mode",
+                    modifier = Modifier.padding(AppTokens.SmallInset)
                 )
-                Spacer(Modifier.width(AppTokens.SmallInset))
-                Text("$gold", color = Gold700, fontWeight = FontWeight.Bold, fontSize = AppTokens.CardTitleText)
             }
         }
     }
