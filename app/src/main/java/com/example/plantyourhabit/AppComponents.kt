@@ -1,6 +1,7 @@
 package com.example.plantyourhabit
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import java.text.SimpleDateFormat
@@ -72,7 +75,11 @@ fun AppHeader(destination: AppDestinations, gold: Int) {
                 modifier = Modifier.padding(horizontal = AppTokens.CardInset, vertical = AppTokens.ComfortableInset),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("🪙", color = Gold700, fontSize = AppTokens.CurrencyText)
+                Image(
+                    painter = painterResource(R.drawable.ic_gold_coin),
+                    contentDescription = "Gold",
+                    modifier = Modifier.height(AppTokens.CurrencyText.value.dp)
+                )
                 Spacer(Modifier.width(AppTokens.SmallInset))
                 Text("$gold", color = Gold700, fontWeight = FontWeight.Bold, fontSize = AppTokens.CardTitleText)
             }
@@ -92,7 +99,12 @@ fun SectionKicker(text: String, color: Color) {
 }
 
 @Composable
-fun SoftActionButton(text: String, modifier: Modifier, onClick: () -> Unit) {
+fun SoftActionButton(
+    text: String,
+    modifier: Modifier,
+    onClick: () -> Unit,
+    icon: Int? = null
+) {
     Button(
         onClick = onClick,
         modifier = modifier.height(AppTokens.SoftActionButtonHeight),
@@ -103,6 +115,17 @@ fun SoftActionButton(text: String, modifier: Modifier, onClick: () -> Unit) {
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = AppTokens.NoElevation)
     ) {
-        Text(text, fontSize = AppTokens.SupportingText, fontWeight = FontWeight.Bold)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            icon?.let {
+                androidx.compose.material3.Icon(
+                    painter = painterResource(it),
+                    contentDescription = null,
+                    modifier = Modifier.height(AppTokens.SupportingText.value.dp),
+                    tint = Green700
+                )
+                Spacer(Modifier.width(AppTokens.CompactInset))
+            }
+            Text(text, fontSize = AppTokens.SupportingText, fontWeight = FontWeight.Bold)
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.example.plantyourhabit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Arrangement
@@ -45,6 +46,7 @@ import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import kotlinx.coroutines.delay
@@ -77,6 +79,7 @@ import com.example.plantyourhabit.ui.theme.BeigeLight
 @Composable
 fun GardenScreen(
     habits: List<Habit>,
+    ownedTrinkets: List<Int>,
     activeBackground: String,
     selectedPlants: Map<Int, String>,
     availablePlants: List<String>,
@@ -188,6 +191,10 @@ fun GardenScreen(
                     bottomShelfInset = GardenTokens.CardInset,
                     modifier = Modifier.fillMaxSize()
                 )
+                GardenTrinkets(
+                    ownedTrinkets = ownedTrinkets,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
             Row(
                 modifier = Modifier
@@ -199,9 +206,10 @@ fun GardenScreen(
             ) {
                 if (habits.size < MAX_HABITS) {
                     SoftActionButton(
-                        text = "＋  Add a habit",
+                        text = "Add a habit",
                         modifier = Modifier.weight(1f),
-                        onClick = {}
+                        onClick = {},
+                        icon = R.drawable.ic_add
                     )
                 } else {
                     Text(
@@ -229,6 +237,65 @@ fun GardenScreen(
               )
           }
       }
+    }
+}
+
+@Composable
+private fun GardenTrinkets(
+    ownedTrinkets: List<Int>,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier) {
+        repeat(MAX_HABITS) { shelfIndex ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {
+                ownedTrinkets.getOrNull(shelfIndex)?.let { trinketId ->
+                    val drawable = when (trinketId) {
+                        1 -> R.drawable.ic_shop_mushroom
+                        2 -> R.drawable.ic_shop_snail
+                        3 -> R.drawable.ic_shop_lantern
+                        else -> null
+                    }
+                    drawable?.let {
+                        Image(
+                            painter = painterResource(it),
+                            contentDescription = when (trinketId) {
+                                1 -> "Tiny mushroom trinket"
+                                2 -> "Lucky snail trinket"
+                                else -> "Golden lantern trinket"
+                            },
+                            modifier = Modifier
+                                .align(
+                                    if (shelfIndex % 2 == 0) {
+                                        Alignment.BottomStart
+                                    } else {
+                                        Alignment.BottomEnd
+                                    }
+                                )
+                                .offset(
+                                    y = -(
+                                        GardenTokens.ShelfPlankHeight +
+                                            GardenTokens.CompactInset +
+                                            if (shelfIndex == MAX_HABITS - 1) GardenTokens.CardInset
+                                            else GardenTokens.NoElevation
+                                        )
+                                )
+                                .padding(horizontal = GardenTokens.TrinketHorizontalInset)
+                                .size(
+                                    if (trinketId == 3) {
+                                        GardenTokens.LanternDisplaySize
+                                    } else {
+                                        GardenTokens.TrinketDisplaySize
+                                    }
+                                )
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -397,7 +464,14 @@ private fun ShelfHabitCard(
                 border = androidx.compose.foundation.BorderStroke(GardenTokens.Hairline, if (done) Green700 else PlantCardBorder)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    if (done) Text("✓", color = Color.White, fontSize = GardenTokens.CheckmarkText, fontWeight = FontWeight.Bold)
+                    if (done) {
+                        androidx.compose.material3.Icon(
+                            painter = painterResource(R.drawable.ic_check),
+                            contentDescription = "Completed today",
+                            tint = Color.White,
+                            modifier = Modifier.size(GardenTokens.CheckmarkText.value.dp)
+                        )
+                    }
                 }
             }
         }
@@ -731,7 +805,14 @@ private fun PlantPickerDialog(
                             color = Green900,
                             fontWeight = FontWeight.Medium
                         )
-                        if (plant == selectedPlant) Text("✓", color = Green700)
+                        if (plant == selectedPlant) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_check),
+                                contentDescription = "Selected",
+                                tint = Green700,
+                                modifier = Modifier.size(GardenTokens.CardTitleText.value.dp)
+                            )
+                        }
                     }
                 }
             }

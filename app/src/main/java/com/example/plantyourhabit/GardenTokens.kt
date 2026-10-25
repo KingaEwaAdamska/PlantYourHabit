@@ -54,4 +54,7 @@ object GardenTokens {
     val TightInset = 3.dp
     val TinyInset = 2.dp
     val TinyLabelText = 7.sp
+    val LanternDisplaySize = 64.dp
+    val TrinketDisplaySize = 44.dp
+    val TrinketHorizontalInset = 32.dp
 }

@@ -1,6 +1,7 @@
 package com.example.plantyourhabit
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -99,7 +102,11 @@ fun QuestsScreen(
                         lineHeight = QuestsTokens.SupportingTitleText
                     )
                 }
-                Text("🗺️", fontSize = QuestsTokens.QuestMapText)
+                Image(
+                    painter = painterResource(R.drawable.ic_quest_map),
+                    contentDescription = "Quest map",
+                    modifier = Modifier.size(QuestsTokens.QuestMapText.value.dp)
+                )
             }
         }
         Column(
@@ -121,7 +128,15 @@ fun QuestsScreen(
             shape = RoundedCornerShape(QuestsTokens.AddQuestButtonCornerRadius),
             colors = ButtonDefaults.buttonColors(containerColor = Green800)
         ) {
-            Text("＋  Add a sidequest", color = Color.White, fontWeight = FontWeight.Bold)
+            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                androidx.compose.material3.Icon(
+                    painter = painterResource(R.drawable.ic_add),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(QuestsTokens.CheckmarkSize)
+                )
+                Text("Add a sidequest", color = Color.White, fontWeight = FontWeight.Bold)
+            }
         }
         Spacer(Modifier.height(QuestsTokens.LargeInset))
     }
@@ -145,15 +160,15 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
                 shape = CircleShape,
                 color = if (done) Green700 else Color.Transparent
             ) {
-                Text(
-                    if (done) "✓" else "",
-                    modifier = Modifier
-                        .size(QuestsTokens.CheckmarkSize)
-                        .padding(top = QuestsTokens.TinyInset),
-                    color = Color.White,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    fontSize = QuestsTokens.CheckmarkText
-                )
+                if (done) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_check),
+                        contentDescription = "Completed",
+                        modifier = Modifier
+                            .size(QuestsTokens.CheckmarkText.value.dp)
+                            .padding(top = QuestsTokens.TinyInset)
+                    )
+                }
             }
             Spacer(Modifier.width(QuestsTokens.ContentInset))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
@@ -172,7 +187,11 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
             }
             Spacer(Modifier.width(QuestsTokens.StandardInset))
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🪙", color = Gold600, fontSize = QuestsTokens.CardTitleText)
+                Image(
+                    painter = painterResource(R.drawable.ic_gold_coin),
+                    contentDescription = "Gold reward",
+                    modifier = Modifier.height(QuestsTokens.CardTitleText.value.dp)
+                )
                 Text(
                     if (done) "Done" else quest.reward.toString(),
                     color = Gold700,

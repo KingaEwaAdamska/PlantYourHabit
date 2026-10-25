@@ -105,6 +105,7 @@ fun PlantYourHabitApp() {
             when (currentDestination) {
                 AppDestinations.GARDEN -> GardenScreen(
                     habits = habits,
+                    ownedTrinkets = ownedTrinkets,
                     activeBackground = activeBackground,
                     selectedPlants = selectedPlants,
                     availablePlants = listOf("monstera", "fern", "sprout") + ownedPlants,
