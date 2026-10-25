@@ -97,6 +97,9 @@ fun PlantYourHabitApp(
             addAll(initialHabits)
         }
     }
+    val quests = remember {
+        mutableStateListOf<Quest>().apply { addAll(initialQuests) }
+    }
     var completedQuests by remember { mutableStateOf(setOf<Int>()) }
 
     val ownedTrinkets = remember { mutableStateListOf<Int>() }
@@ -169,12 +172,17 @@ fun PlantYourHabitApp(
                 )
 
                 AppDestinations.QUESTS -> QuestsScreen(
+                    quests = quests,
                     completedQuests = completedQuests,
                     onCompleteQuest = { id, reward ->
                         if (!completedQuests.contains(id)) {
                             completedQuests = completedQuests + id
                             gold += reward
                         }
+                    },
+                    onCreateQuest = { quest -> quests.add(quest) },
+                    onRemoveQuest = { id ->
+                        quests.removeAll { it.id == id }
                     },
                     modifier = Modifier.weight(1f)
                 )

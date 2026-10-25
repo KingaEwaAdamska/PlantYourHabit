@@ -117,4 +117,6 @@ fun exampleCareDays(streakDays: Int): List<String> {
 
 val initialHabits = listOf(
     Habit(1, "Morning water", "monstera", 6, exampleCareDays(1)),
+    Habit(2, "Read 20 mins", "fern", 8, exampleCareDays(40)),
+    Habit(3, "Evening walk", "sprout", 10, exampleCareDays(60))
 )

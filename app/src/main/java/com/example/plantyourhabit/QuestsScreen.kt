@@ -1,5 +1,10 @@
 package com.example.plantyourhabit
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.MutableTransitionState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -21,9 +26,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,6 +46,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
@@ -45,7 +61,7 @@ import com.example.plantyourhabit.ui.theme.Green800
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextSecondary
 
-private data class Quest(
+data class Quest(
     val id: Int,
     val title: String,
     val description: String,
@@ -54,7 +70,7 @@ private data class Quest(
     val reward: Int
 )
 
-private val quests = listOf(
+val initialQuests = listOf(
     Quest(1, "Book dentist appointment", "Find a nearby clinic and choose a time that works.", listOf("Life admin", "Health"), "Medium", 35),
     Quest(2, "Organize the photo drawer", "Sort loose prints into keep, share, and archive piles.", listOf("Home"), "Medium", 25),
     Quest(3, "Try a new soup recipe", "Pick something seasonal and make enough for tomorrow.", listOf("Someday", "Cooking"), "Easy", 20),
@@ -63,10 +79,14 @@ private val quests = listOf(
 
 @Composable
 fun QuestsScreen(
+    quests: List<Quest>,
     completedQuests: Set<Int>,
     onCompleteQuest: (Int, Int) -> Unit,
+    onCreateQuest: (Quest) -> Unit,
+    onRemoveQuest: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showCreateQuestDialog by remember { mutableStateOf(false) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -114,14 +134,37 @@ fun QuestsScreen(
             verticalArrangement = Arrangement.spacedBy(QuestsTokens.ComfortableInset)
         ) {
             quests.forEach { quest ->
-                val done = quest.id in completedQuests
-                QuestCard(quest = quest, done = done) {
-                    onCompleteQuest(quest.id, quest.reward)
+                key(quest.id) {
+                    val done = quest.id in completedQuests
+                    val visibleState = remember { MutableTransitionState(true) }
+                    val removeQuest by rememberUpdatedState(onRemoveQuest)
+
+                    LaunchedEffect(done) {
+                        if (done) visibleState.targetState = false
+                    }
+                    LaunchedEffect(visibleState.isIdle, visibleState.currentState) {
+                        if (done && visibleState.isIdle && !visibleState.currentState) {
+                            removeQuest(quest.id)
+                        }
+                    }
+
+                    AnimatedVisibility(
+                        visibleState = visibleState,
+                        exit = fadeOut(animationSpec = tween(700)) +
+                            shrinkVertically(
+                                animationSpec = tween(700),
+                                shrinkTowards = Alignment.Top
+                            )
+                    ) {
+                        QuestCard(quest = quest, done = done) {
+                            onCompleteQuest(quest.id, quest.reward)
+                        }
+                    }
                 }
             }
         }
         Button(
-            onClick = {},
+            onClick = { showCreateQuestDialog = true },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = QuestsTokens.PageInset),
@@ -140,6 +183,101 @@ fun QuestsScreen(
         }
         Spacer(Modifier.height(QuestsTokens.LargeInset))
     }
+
+    if (showCreateQuestDialog) {
+        CreateQuestDialog(
+            onDismiss = { showCreateQuestDialog = false },
+            onCreate = { title, description, tags, difficulty, reward ->
+                val nextId = (quests.maxOfOrNull(Quest::id) ?: 0) + 1
+                onCreateQuest(Quest(nextId, title, description, tags, difficulty, reward))
+                showCreateQuestDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun CreateQuestDialog(
+    onDismiss: () -> Unit,
+    onCreate: (String, String, List<String>, String, Int) -> Unit
+) {
+    var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var tags by remember { mutableStateOf("") }
+    var difficulty by remember { mutableStateOf("Easy") }
+    var rewardText by remember { mutableStateOf("20") }
+    val reward = rewardText.toIntOrNull()
+    val canCreate = title.isNotBlank() && description.isNotBlank() && reward != null && reward > 0
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Create a sidequest") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(QuestsTokens.StandardInset)
+            ) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Quest title") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") }
+                )
+                OutlinedTextField(
+                    value = tags,
+                    onValueChange = { tags = it },
+                    label = { Text("Tags (comma separated)") },
+                    singleLine = true
+                )
+                Text("Difficulty", color = Green900, fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
+                    listOf("Easy", "Medium", "Hard").forEach { option ->
+                        TagChip(
+                            text = if (difficulty == option) "✓ $option" else option,
+                            color = if (difficulty == option) Green200 else BeigeBackground,
+                            modifier = Modifier.clickable { difficulty = option }
+                        )
+                    }
+                }
+                OutlinedTextField(
+                    value = rewardText,
+                    onValueChange = { rewardText = it.filter(Char::isDigit) },
+                    label = { Text("Gold reward") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val validReward = reward ?: return@Button
+                    onCreate(
+                        title.trim(),
+                        description.trim(),
+                        tags.split(",").map(String::trim).filter(String::isNotEmpty),
+                        difficulty,
+                        validReward
+                    )
+                },
+                enabled = canCreate
+            ) {
+                Text("Create")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -204,8 +342,8 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun TagChip(text: String, color: Color) {
-    Surface(shape = CircleShape, color = color) {
+private fun TagChip(text: String, color: Color, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, shape = CircleShape, color = color) {
         Text(
             text.uppercase(),
             modifier = Modifier.padding(horizontal = QuestsTokens.SmallInset, vertical = QuestsTokens.TightInset),
