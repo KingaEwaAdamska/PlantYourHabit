@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -87,6 +88,18 @@ fun QuestsScreen(
     modifier: Modifier = Modifier
 ) {
     var showCreateQuestDialog by remember { mutableStateOf(false) }
+    var selectedTagFilters by remember { mutableStateOf(emptySet<String>()) }
+    val availableTags = quests
+        .flatMap(Quest::tags)
+        .distinctBy { it.trim().lowercase() }
+        .sortedBy { it.lowercase() }
+    val filteredQuests = if (selectedTagFilters.isEmpty()) {
+        quests
+    } else {
+        quests.filter { quest ->
+            quest.tags.any { it.trim().lowercase() in selectedTagFilters }
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -129,11 +142,46 @@ fun QuestsScreen(
                 )
             }
         }
+        if (availableTags.isNotEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = QuestsTokens.SectionInset),
+                verticalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)
+            ) {
+                SectionKicker("FILTER BY TAG", Green700)
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)
+                ) {
+                    TagChip(
+                        text = "All",
+                        color = if (selectedTagFilters.isEmpty()) Green200 else BeigeBackground,
+                        modifier = Modifier.clickable { selectedTagFilters = emptySet() }
+                    )
+                    availableTags.forEach { tag ->
+                        val normalizedTag = tag.trim().lowercase()
+                        val selected = normalizedTag in selectedTagFilters
+                        TagChip(
+                            text = tag,
+                            color = if (selected) Green200 else BeigeBackground,
+                            modifier = Modifier.clickable {
+                                selectedTagFilters = if (selected) {
+                                    selectedTagFilters - normalizedTag
+                                } else {
+                                    selectedTagFilters + normalizedTag
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
         Column(
             modifier = Modifier.padding(top = QuestsTokens.SectionInset),
             verticalArrangement = Arrangement.spacedBy(QuestsTokens.ComfortableInset)
         ) {
-            quests.forEach { quest ->
+            filteredQuests.forEach { quest ->
                 key(quest.id) {
                     val done = quest.id in completedQuests
                     val visibleState = remember { MutableTransitionState(true) }
@@ -160,6 +208,13 @@ fun QuestsScreen(
                             onCompleteQuest(quest.id, quest.reward)
                         }
                     }
+                }
+                if (filteredQuests.isEmpty()) {
+                    Text(
+                        "No quests match these tags.",
+                        color = TextSecondary,
+                        modifier = Modifier.padding(vertical = QuestsTokens.StandardInset)
+                    )
                 }
             }
         }
