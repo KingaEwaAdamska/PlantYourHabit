@@ -181,8 +181,11 @@ fun PlantYourHabitApp(
                         }
                     },
                     onCreateQuest = { quest -> quests.add(quest) },
-                    onRemoveQuest = { id ->
-                        quests.removeAll { it.id == id }
+                    onUpdateQuest = { updatedQuest ->
+                        val questIndex = quests.indexOfFirst { it.id == updatedQuest.id }
+                        if (questIndex >= 0) {
+                            quests[questIndex] = updatedQuest
+                        }
                     },
                     modifier = Modifier.weight(1f)
                 )
