@@ -17,15 +17,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,17 +30,12 @@ import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.BeigeMedium
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
 import com.example.plantyourhabit.ui.theme.Gold100
-import com.example.plantyourhabit.ui.theme.Gold600
-import com.example.plantyourhabit.ui.theme.Gold700
-import com.example.plantyourhabit.ui.theme.Green100
 import com.example.plantyourhabit.ui.theme.Green200
 import com.example.plantyourhabit.ui.theme.Green300
 import com.example.plantyourhabit.ui.theme.Green500
@@ -55,9 +43,6 @@ import com.example.plantyourhabit.ui.theme.Green700
 import com.example.plantyourhabit.ui.theme.Green800
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextMuted
-import com.example.plantyourhabit.ui.theme.TextSecondary
-import com.example.plantyourhabit.ui.theme.Terracotta100
-import com.example.plantyourhabit.ui.theme.Terracotta600
 
 private data class Habit(
     val id: Int,
@@ -457,4 +442,3 @@ private fun GardenWindow(modifier: Modifier = Modifier) {
         }
     }
 }
-
