@@ -5,23 +5,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -29,15 +29,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.res.painterResource
-import com.example.plantyourhabit.ui.theme.PlantYourHabitTheme
-import com.example.plantyourhabit.ui.theme.Green300
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import com.example.plantyourhabit.ui.theme.Green300
+import com.example.plantyourhabit.ui.theme.Green500
+import com.example.plantyourhabit.ui.theme.PlantYourHabitTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,115 +56,157 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun PlantYourHabitApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.GARDEN) }
+    var currentDestination by rememberSaveable {
+        mutableStateOf(AppDestinations.GARDEN)
+    }
     var gold by rememberSaveable { mutableStateOf(120) }
     var completedHabits by remember { mutableStateOf(setOf(1)) }
     var completedQuests by remember { mutableStateOf(setOf<Int>()) }
+
     val ownedTrinkets = remember { mutableStateListOf<Int>() }
     val ownedPlants = remember { mutableStateListOf<String>() }
-    val ownedBackgrounds = remember { mutableStateListOf("classic") }
-    var activeBackground by rememberSaveable { mutableStateOf("classic") }
-    val colorScheme = MaterialTheme.colorScheme
-    val navigationItemColors = NavigationSuiteDefaults.itemColors(
-        navigationBarItemColors = NavigationBarItemDefaults.colors(
-            indicatorColor = Color.Transparent,
-            selectedTextColor = colorScheme.primary,
-            unselectedTextColor = colorScheme.primary
-        ),
-        navigationRailItemColors = NavigationRailItemDefaults.colors(
-            indicatorColor = Color.Transparent,
-            selectedTextColor = colorScheme.primary
-        ),
-        navigationDrawerItemColors = NavigationDrawerItemDefaults.colors(
-            selectedContainerColor = Color.Transparent,
-            selectedTextColor = colorScheme.primary
-        )
-    )
+    val ownedBackgrounds = remember {
+        mutableStateListOf("classic")
+    }
 
-    NavigationSuiteScaffold(
-        navigationSuiteColors = NavigationSuiteDefaults.colors(
-            shortNavigationBarContainerColor = colorScheme.surface,
-            shortNavigationBarContentColor = colorScheme.onSurface,
-            navigationBarContainerColor = colorScheme.surface,
-            navigationBarContentColor = colorScheme.onSurface,
-            navigationRailContainerColor = colorScheme.surface,
-            navigationRailContentColor = colorScheme.onSurface,
-            navigationDrawerContainerColor = colorScheme.surface,
-            navigationDrawerContentColor = colorScheme.onSurface
-        ),
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        DestinationNavigationIcon(it, it == currentDestination)
+    var activeBackground by rememberSaveable {
+        mutableStateOf("classic")
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            CustomNavigationBar(
+                currentDestination = currentDestination,
+                onDestinationSelected = { destination ->
+                    currentDestination = destination
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            AppHeader(
+                destination = currentDestination,
+                gold = gold
+            )
+
+            when (currentDestination) {
+                AppDestinations.GARDEN -> GardenScreen(
+                    completedHabits = completedHabits,
+                    activeBackground = activeBackground,
+                    onToggleHabit = { id, reward ->
+                        val done = completedHabits.contains(id)
+
+                        completedHabits =
+                            if (done) {
+                                completedHabits - id
+                            } else {
+                                completedHabits + id
+                            }
+
+                        gold = (
+                                gold + if (done) -reward else reward
+                                ).coerceAtLeast(0)
                     },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it },
-                    colors = navigationItemColors
+                    onOpenShop = {
+                        currentDestination = AppDestinations.SHOP
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                AppDestinations.QUESTS -> QuestsScreen(
+                    completedQuests = completedQuests,
+                    onCompleteQuest = { id, reward ->
+                        if (!completedQuests.contains(id)) {
+                            completedQuests = completedQuests + id
+                            gold += reward
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                AppDestinations.SHOP -> ShopScreen(
+                    gold = gold,
+                    ownedTrinkets = ownedTrinkets,
+                    ownedPlants = ownedPlants,
+                    ownedBackgrounds = ownedBackgrounds,
+                    activeBackground = activeBackground,
+                    onBuyTrinket = { id, price ->
+                        if (id !in ownedTrinkets && gold >= price) {
+                            gold -= price
+                            ownedTrinkets.add(id)
+                        }
+                    },
+                    onBuyPlant = { id, price ->
+                        if (id !in ownedPlants && gold >= price) {
+                            gold -= price
+                            ownedPlants.add(id)
+                        }
+                    },
+                    onSelectBackground = { id, price ->
+                        if (id in ownedBackgrounds) {
+                            activeBackground = id
+                        } else if (gold >= price) {
+                            gold -= price
+                            ownedBackgrounds.add(id)
+                            activeBackground = id
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CustomNavigationBar(
+    currentDestination: AppDestinations,
+    onDestinationSelected: (AppDestinations) -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorScheme.surface)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        AppDestinations.entries.forEach { destination ->
+            val selected = destination == currentDestination
+
             Column(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
+                    .weight(1f)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember {
+                            androidx.compose.foundation.interaction
+                                .MutableInteractionSource()
+                        }
+                    ) {
+                        onDestinationSelected(destination)
+                    }
+                    .padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                AppHeader(destination = currentDestination, gold = gold)
-                when (currentDestination) {
-                    AppDestinations.GARDEN -> GardenScreen(
-                        completedHabits = completedHabits,
-                        activeBackground = activeBackground,
-                        onToggleHabit = { id, reward ->
-                            val done = completedHabits.contains(id)
-                            completedHabits = if (done) completedHabits - id else completedHabits + id
-                            gold = (gold + if (done) -reward else reward).coerceAtLeast(0)
-                        },
-                        onOpenShop = { currentDestination = AppDestinations.SHOP },
-                        modifier = Modifier.weight(1f)
-                    )
-                    AppDestinations.QUESTS -> QuestsScreen(
-                        completedQuests = completedQuests,
-                        onCompleteQuest = { id, reward ->
-                            if (!completedQuests.contains(id)) {
-                                completedQuests = completedQuests + id
-                                gold += reward
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                    AppDestinations.SHOP -> ShopScreen(
-                        gold = gold,
-                        ownedTrinkets = ownedTrinkets,
-                        ownedPlants = ownedPlants,
-                        ownedBackgrounds = ownedBackgrounds,
-                        activeBackground = activeBackground,
-                        onBuyTrinket = { id, price ->
-                            if (id !in ownedTrinkets && gold >= price) {
-                                gold -= price
-                                ownedTrinkets.add(id)
-                            }
-                        },
-                        onBuyPlant = { id, price ->
-                            if (id !in ownedPlants && gold >= price) {
-                                gold -= price
-                                ownedPlants.add(id)
-                            }
-                        },
-                        onSelectBackground = { id, price ->
-                            if (id in ownedBackgrounds) {
-                                activeBackground = id
-                            } else if (gold >= price) {
-                                gold -= price
-                                ownedBackgrounds.add(id)
-                                activeBackground = id
-                            }
-                        },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                DestinationNavigationIcon(
+                    destination = destination,
+                    selected = selected
+                )
+
+                Text(
+                    text = destination.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -178,15 +222,32 @@ enum class AppDestinations(
 }
 
 @Composable
-private fun DestinationNavigationIcon(destination: AppDestinations, selected: Boolean) {
+private fun DestinationNavigationIcon(
+    destination: AppDestinations,
+    selected: Boolean
+) {
+    val surfaceColor = MaterialTheme.colorScheme.surface
+
     val color by animateColorAsState(
-        targetValue = if (selected) Green300 else MaterialTheme.colorScheme.surface,
-        animationSpec = tween(durationMillis = 250),
+        targetValue = if (selected) Green300 else Color.Transparent,
+        animationSpec = if (selected) {
+            keyframes {
+                durationMillis = 400
+
+                surfaceColor at 0
+                Green500 at 200
+                Green300 at 400
+            }
+        } else {
+            tween(durationMillis = 400)
+        },
         label = "navigationSelection"
     )
+
     Box(
         modifier = Modifier
             .size(40.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(color, RectangleShape),
         contentAlignment = Alignment.Center
     ) {
