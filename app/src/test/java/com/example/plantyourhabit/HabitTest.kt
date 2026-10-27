@@ -7,6 +7,17 @@ import org.junit.Test
 
 class HabitTest {
     @Test
+    fun exampleCareDaysEndsYesterday() {
+        val today = LocalDate.now()
+
+        val careDays = exampleCareDays(3).map(LocalDate::parse)
+
+        assertEquals(3, careDays.size)
+        assertEquals(today.minusDays(1), careDays.last())
+        assertEquals(today.minusDays(3), careDays.first())
+    }
+
+    @Test
     fun addingTodayStartsStreakAndDoesNotDuplicateCareDay() {
         val today = LocalDate.of(2026, 10, 27)
         val habit = Habit(1, "Water plants", "fern", 5)

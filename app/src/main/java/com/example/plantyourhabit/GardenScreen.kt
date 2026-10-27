@@ -51,6 +51,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import com.example.plantyourhabit.ui.theme.BeigeMedium
@@ -86,9 +87,12 @@ fun GardenScreen(
     ownedTrinkets: List<Int>,
     activeBackground: String,
     selectedPlants: Map<Int, String>,
+    habitSlots: Map<Int, Int>,
     availablePlants: List<String>,
     onSelectPlant: (Int, String) -> Unit,
     onCreateHabit: (Habit) -> Unit,
+    completedHabit: Habit?,
+    onCompletionAcknowledged: () -> Unit,
     onToggleHabit: (Habit) -> Unit,
     onOpenShop: () -> Unit,
     modifier: Modifier = Modifier
@@ -193,7 +197,8 @@ fun GardenScreen(
                     modifier = Modifier.fillMaxSize()
                 )
                 GardenPlants(
-                    habits = habits.take(MAX_HABITS),
+                    habits = habits,
+                    habitSlots = habitSlots,
                     today = today,
                     selectedPlants = selectedPlants,
                     onEditPlant = { editingHabitId = it },
@@ -257,6 +262,65 @@ fun GardenScreen(
                       onCreateHabit(Habit(nextId, name, "sprout", 6))
                   }
                   showAddHabitDialog = false
+              }
+          )
+      }
+      completedHabit?.let { habit ->
+          AlertDialog(
+              onDismissRequest = {},
+              title = {
+                  Text(
+                      "Congratulations!",
+                      modifier = Modifier.fillMaxWidth(),
+                      textAlign = TextAlign.Center
+                  )
+              },
+              text = {
+                  Column(
+                      modifier = Modifier.fillMaxWidth(),
+                      horizontalAlignment = Alignment.CenterHorizontally
+                  ) {
+                      Box(
+                          modifier = Modifier
+                              .fillMaxWidth()
+                              .height(190.dp)
+                              .clip(RoundedCornerShape(28.dp))
+                              .background(
+                                  Brush.verticalGradient(
+                                      listOf(Color(0xFFFFE7E8), Color(0xFFFFF3D9))
+                                  )
+                              ),
+                          contentAlignment = Alignment.Center
+                      ) {
+                          Canvas(Modifier.fillMaxSize()) {
+                              val sparkleColor = Color(0xFFFFC45C).copy(alpha = .8f)
+                              listOf(
+                                  Offset(size.width * .2f, size.height * .25f),
+                                  Offset(size.width * .78f, size.height * .2f),
+                                  Offset(size.width * .82f, size.height * .65f),
+                                  Offset(size.width * .16f, size.height * .72f)
+                              ).forEach { sparkle ->
+                                  drawCircle(sparkleColor, radius = size.minDimension * .018f, center = sparkle)
+                              }
+                          }
+                          ShelfPlant(
+                              type = habit.plant,
+                              habit = habit,
+                              today = today,
+                              modifier = Modifier.size(112.dp, 166.dp)
+                          )
+                      }
+                      Text(
+                          "Your habit's completed, you're ready for the next change in your life.",
+                          modifier = Modifier.padding(top = GardenTokens.ContentInset),
+                          textAlign = TextAlign.Center
+                      )
+                  }
+              },
+              confirmButton = {
+                  TextButton(onClick = onCompletionAcknowledged) {
+                      Text("Continue")
+                  }
               }
           )
       }
@@ -403,6 +467,7 @@ private fun GardenShelf(
 @Composable
 private fun GardenPlants(
     habits: List<Habit>,
+    habitSlots: Map<Int, Int>,
     today: LocalDate,
     selectedPlants: Map<Int, String>,
     onEditPlant: (Int) -> Unit,
@@ -418,7 +483,7 @@ private fun GardenPlants(
                     .weight(1f)
                     .fillMaxWidth()
             ) {
-                habits.getOrNull(index)?.let { habit ->
+                habits.firstOrNull { habitSlots[it.id] == index }?.let { habit ->
                     val done = today.toString() in habit.careDays
                     val plankOffset = GardenTokens.ShelfPlankHeight +
                         if (index == MAX_HABITS - 1) bottomShelfInset else GardenTokens.NoElevation
@@ -926,7 +991,10 @@ private fun String.displayName(): String = when (this) {
 }
 
 @Composable
-private fun GardenWindow(activeBackground: String, modifier: Modifier = Modifier) {
+private fun GardenWindow(
+    activeBackground: String,
+    modifier: Modifier = Modifier
+) {
     val windowShape = RoundedCornerShape(
         topStart = GardenTokens.GardenWindowInnerArchRadius,
         topEnd = GardenTokens.GardenWindowInnerArchRadius,

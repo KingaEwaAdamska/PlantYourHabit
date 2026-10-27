@@ -151,6 +151,14 @@ fun PlantYourHabitApp(
             addAll(initialHabits)
         }
     }
+    val habitSlots = remember {
+        mutableStateMapOf<Int, Int>().apply {
+            initialHabits.take(MAX_HABITS).forEachIndexed { index, habit ->
+                this[habit.id] = index
+            }
+        }
+    }
+    var completedHabit by remember { mutableStateOf<Habit?>(null) }
     val quests = remember {
         mutableStateListOf<Quest>().apply { addAll(initialQuests) }
     }
@@ -198,6 +206,7 @@ fun PlantYourHabitApp(
                     ownedTrinkets = ownedTrinkets,
                     activeBackground = activeBackground,
                     selectedPlants = selectedPlants,
+                    habitSlots = habitSlots,
                     availablePlants = listOf("monstera", "fern", "sprout") + ownedPlants,
                     onSelectPlant = { habitId, plant ->
                         selectedPlants[habitId] = plant
@@ -205,9 +214,17 @@ fun PlantYourHabitApp(
                     onCreateHabit = { habit ->
                         if (habits.size < MAX_HABITS) {
                             habits.add(habit)
+                            val occupiedSlots = habits
+                                .filterNot { it.id == habit.id }
+                                .mapNotNull { habitSlots[it.id] }
+                                .toSet()
+                            habitSlots[habit.id] = (0 until MAX_HABITS)
+                                .first { it !in occupiedSlots }
                             selectedPlants[habit.id] = habit.plant
                         }
                     },
+                    completedHabit = completedHabit,
+                    onCompletionAcknowledged = { completedHabit = null },
                     onToggleHabit = { habit ->
                         val today = LocalDate.now()
                         val done = today.toString() in habit.careDays
@@ -224,8 +241,18 @@ fun PlantYourHabitApp(
                         } else {
                             habit.addToday(today)
                         }
+                        val reachedCompletion = !done &&
+                            habit.actualStreak(today) < MAX_STREAK_DAY &&
+                            updatedHabit.actualStreak(today) == MAX_STREAK_DAY
                         val habitIndex = habits.indexOfFirst { it.id == habit.id }
-                        if (habitIndex >= 0) {
+                        if (reachedCompletion && habitIndex >= 0) {
+                            completedHabit = updatedHabit.copy(
+                                plant = selectedPlants[habit.id] ?: habit.plant
+                            )
+                            habits.removeAt(habitIndex)
+                            habitSlots.remove(habit.id)
+                            selectedPlants.remove(habit.id)
+                        } else if (habitIndex >= 0) {
                             habits[habitIndex] = updatedHabit
                         }
 
