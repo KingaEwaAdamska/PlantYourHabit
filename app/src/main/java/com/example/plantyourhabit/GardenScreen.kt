@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -550,6 +551,19 @@ private fun ShelfPlant(
         animationSpec = tween(durationMillis = PLANT_GROWTH_ANIMATION_MILLIS),
         label = "plantGrowth"
     )
+    val growthGlow = remember(habit.id) { Animatable(0f) }
+    var wasDone by remember(habit.id) {
+        mutableStateOf(today.toString() in habit.careDays)
+    }
+    LaunchedEffect(today, habit.careDays) {
+        val isDone = today.toString() in habit.careDays
+        val justCompleted = isDone && !wasDone
+        wasDone = isDone
+        if (justCompleted) {
+            growthGlow.animateTo(1f, animationSpec = tween(durationMillis = 180))
+            growthGlow.animateTo(0f, animationSpec = tween(durationMillis = 650))
+        }
+    }
     Canvas(modifier) {
         val w = size.width
         val h = size.height
@@ -578,6 +592,23 @@ private fun ShelfPlant(
         withTransform({
             scale(plantScale, plantScale, pivot = androidx.compose.ui.geometry.Offset(w * .5f, h * .78f))
         }) {
+        if (growthGlow.value > 0f) {
+            val glowCenter = androidx.compose.ui.geometry.Offset(w * .5f, h * .43f)
+            val glowRadius = minOf(w, h) * .58f
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colorStops = arrayOf(
+                        0f to Color(0xFFFFD54F).copy(alpha = .72f * growthGlow.value),
+                        .45f to Color(0xFFFFE89A).copy(alpha = .4f * growthGlow.value),
+                        1f to Color.Transparent
+                    ),
+                    center = glowCenter,
+                    radius = glowRadius
+                ),
+                radius = glowRadius,
+                center = glowCenter
+            )
+        }
         if (animatedStage <= 0f) {
             if (habit.hasCareHistory(today)) {
                 drawLine(

@@ -2,7 +2,10 @@ package com.example.plantyourhabit
 
 import android.app.Activity
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,8 +28,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -88,6 +93,55 @@ fun PlantYourHabitApp(
     darkTheme: Boolean = false,
     onToggleTheme: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val habitSoundPool = remember(context) {
+        SoundPool.Builder()
+            .setMaxStreams(1)
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+            .build()
+    }
+    var habitSoundId by remember(habitSoundPool) { mutableIntStateOf(0) }
+    var habitLoseSoundId by remember(habitSoundPool) { mutableIntStateOf(0) }
+    var habitSoundLoaded by remember(habitSoundPool) { mutableStateOf(false) }
+    var habitLoseSoundLoaded by remember(habitSoundPool) { mutableStateOf(false) }
+    DisposableEffect(habitSoundPool) {
+        habitSoundPool.setOnLoadCompleteListener { _, sampleId, status ->
+            when (sampleId) {
+                habitSoundId -> {
+                    if (status == 0) {
+                        habitSoundLoaded = true
+                    } else {
+                        Log.e("PlantYourHabit", "Failed to load habit sound (status=$status)")
+                    }
+                }
+                habitLoseSoundId -> {
+                    if (status == 0) {
+                        habitLoseSoundLoaded = true
+                    } else {
+                        Log.e("PlantYourHabit", "Failed to load habit lose sound (status=$status)")
+                    }
+                }
+            }
+        }
+        habitSoundId = habitSoundPool.load(context, R.raw.habit_sound, 1)
+        habitLoseSoundId = habitSoundPool.load(context, R.raw.habit_lose_sound, 1)
+        if (habitSoundId == 0) {
+            Log.e("PlantYourHabit", "Failed to request habit sound loading")
+        }
+        if (habitLoseSoundId == 0) {
+            Log.e("PlantYourHabit", "Failed to request habit lose sound loading")
+        }
+        onDispose {
+            habitSoundPool.setOnLoadCompleteListener(null)
+            habitSoundPool.release()
+        }
+    }
+
     var currentDestination by rememberSaveable {
         mutableStateOf(AppDestinations.GARDEN)
     }
@@ -157,6 +211,14 @@ fun PlantYourHabitApp(
                     onToggleHabit = { habit ->
                         val today = LocalDate.now()
                         val done = today.toString() in habit.careDays
+                        val soundLoaded = if (done) habitLoseSoundLoaded else habitSoundLoaded
+                        if (soundLoaded) {
+                            val soundId = if (done) habitLoseSoundId else habitSoundId
+                            val streamId = habitSoundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+                            if (streamId == 0) {
+                                Log.e("PlantYourHabit", "Failed to play habit sound")
+                            }
+                        }
                         val updatedHabit = if (done) {
                             habit.removeToday(today)
                         } else {
