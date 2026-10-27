@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,9 +24,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -32,11 +42,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
 import com.example.plantyourhabit.ui.theme.Gold100
-import com.example.plantyourhabit.ui.theme.Gold600
 import com.example.plantyourhabit.ui.theme.Gold700
 import com.example.plantyourhabit.ui.theme.Green100
 import com.example.plantyourhabit.ui.theme.Green200
@@ -45,7 +56,7 @@ import com.example.plantyourhabit.ui.theme.Green800
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextSecondary
 
-private data class Quest(
+data class Quest(
     val id: Int,
     val title: String,
     val description: String,
@@ -54,7 +65,7 @@ private data class Quest(
     val reward: Int
 )
 
-private val quests = listOf(
+val initialQuests = listOf(
     Quest(1, "Book dentist appointment", "Find a nearby clinic and choose a time that works.", listOf("Life admin", "Health"), "Medium", 35),
     Quest(2, "Organize the photo drawer", "Sort loose prints into keep, share, and archive piles.", listOf("Home"), "Medium", 25),
     Quest(3, "Try a new soup recipe", "Pick something seasonal and make enough for tomorrow.", listOf("Someday", "Cooking"), "Easy", 20),
@@ -63,21 +74,44 @@ private val quests = listOf(
 
 @Composable
 fun QuestsScreen(
+    quests: List<Quest>,
     completedQuests: Set<Int>,
     onCompleteQuest: (Int, Int) -> Unit,
+    onCreateQuest: (Quest) -> Unit,
+    onUpdateQuest: (Quest) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
+    var showCreateQuestDialog by remember { mutableStateOf(false) }
+    var questBeingEdited by remember { mutableStateOf<Quest?>(null) }
+    var showCompletedQuests by remember { mutableStateOf(true) }
+    var selectedTagFilters by remember { mutableStateOf(emptySet<String>()) }
+    val availableTags = quests
+        .flatMap(Quest::tags)
+        .distinctBy { it.trim().lowercase() }
+        .sortedBy { it.lowercase() }
+    val filteredQuests = (if (selectedTagFilters.isEmpty()) {
+        quests
+    } else {
+        quests.filter { quest ->
+            quest.tags.any { it.trim().lowercase() in selectedTagFilters }
+        }
+    }).filter { showCompletedQuests || it.id !in completedQuests }
+        .sortedBy { it.id in completedQuests }
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .background(CreamBackground)
-            .padding(horizontal = QuestsTokens.PageInset, vertical = QuestsTokens.MicroPadding)
+            .padding(horizontal = QuestsTokens.PageInset),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            vertical = QuestsTokens.MicroPadding
+        ),
+        verticalArrangement = Arrangement.spacedBy(QuestsTokens.ComfortableInset)
     ) {
-        Card(
-            shape = RoundedCornerShape(QuestsTokens.LargeCardRadius),
-            colors = CardDefaults.cardColors(containerColor = Green200)
-        ) {
+        item {
+            Card(
+                shape = RoundedCornerShape(QuestsTokens.LargeCardRadius),
+                colors = CardDefaults.cardColors(containerColor = Green200)
+            ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -108,46 +142,235 @@ fun QuestsScreen(
                     modifier = Modifier.size(QuestsTokens.QuestMapText.value.dp)
                 )
             }
+            }
         }
-        Column(
-            modifier = Modifier.padding(top = QuestsTokens.SectionInset),
-            verticalArrangement = Arrangement.spacedBy(QuestsTokens.ComfortableInset)
-        ) {
-            quests.forEach { quest ->
-                val done = quest.id in completedQuests
-                QuestCard(quest = quest, done = done) {
-                    onCompleteQuest(quest.id, quest.reward)
+        if (availableTags.isNotEmpty()) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)
+                ) {
+                    SectionKicker("FILTER BY TAG", Green700)
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)
+                    ) {
+                        TagChip(
+                            text = "All",
+                            color = if (selectedTagFilters.isEmpty()) Green200 else BeigeBackground,
+                            modifier = Modifier.clickable { selectedTagFilters = emptySet() }
+                        )
+                        availableTags.forEach { tag ->
+                            val normalizedTag = tag.trim().lowercase()
+                            val selected = normalizedTag in selectedTagFilters
+                            TagChip(
+                                text = tag,
+                                color = if (selected) Green200 else BeigeBackground,
+                                modifier = Modifier.clickable {
+                                    selectedTagFilters = if (selected) {
+                                        selectedTagFilters - normalizedTag
+                                    } else {
+                                        selectedTagFilters + normalizedTag
+                                    }
+                                }
+                            )
+                        }
+                    }
                 }
             }
         }
-        Button(
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = QuestsTokens.PageInset),
-            shape = RoundedCornerShape(QuestsTokens.AddQuestButtonCornerRadius),
-            colors = ButtonDefaults.buttonColors(containerColor = Green800)
-        ) {
-            androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
-                androidx.compose.material3.Icon(
-                    painter = painterResource(R.drawable.ic_add),
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(QuestsTokens.CheckmarkSize)
+        item {
+            Column {
+                Text(
+                    "Tap a quest to edit it, or check it off to complete.",
+                    color = TextSecondary,
+                    fontSize = QuestsTokens.SupportingText
                 )
-                Text("Add a sidequest", color = Color.White, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = showCompletedQuests,
+                        onCheckedChange = { showCompletedQuests = it }
+                    )
+                    Text(
+                        "Show completed quests",
+                        color = Green900,
+                        fontSize = QuestsTokens.SupportingText,
+                        modifier = Modifier.clickable {
+                            showCompletedQuests = !showCompletedQuests
+                        }
+                    )
+                }
             }
         }
-        Spacer(Modifier.height(QuestsTokens.LargeInset))
+        if (filteredQuests.isEmpty()) {
+            item {
+                Text(
+                    "No quests match these filters.",
+                    color = TextSecondary,
+                    modifier = Modifier.padding(vertical = QuestsTokens.StandardInset)
+                )
+            }
+        }
+        items(filteredQuests, key = Quest::id) { quest ->
+            QuestCard(
+                modifier = Modifier.animateItem(),
+                quest = quest,
+                done = quest.id in completedQuests,
+                onEdit = { questBeingEdited = quest },
+                onComplete = { onCompleteQuest(quest.id, quest.reward) }
+            )
+        }
+        item {
+            Button(
+                onClick = { showCreateQuestDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = QuestsTokens.PageInset),
+                shape = RoundedCornerShape(QuestsTokens.AddQuestButtonCornerRadius),
+                colors = ButtonDefaults.buttonColors(containerColor = Green800)
+            ) {
+                androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
+                    androidx.compose.material3.Icon(
+                        painter = painterResource(R.drawable.ic_add),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(QuestsTokens.CheckmarkSize)
+                    )
+                    Text("Add a sidequest", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+            Spacer(Modifier.height(QuestsTokens.LargeInset))
+        }
+    }
+
+    if (showCreateQuestDialog) {
+        QuestEditorDialog(
+            quest = null,
+            onDismiss = { showCreateQuestDialog = false },
+            onSave = { title, description, tags, difficulty, reward ->
+                val nextId = (quests.maxOfOrNull(Quest::id) ?: 0) + 1
+                onCreateQuest(Quest(nextId, title, description, tags, difficulty, reward))
+                showCreateQuestDialog = false
+            }
+        )
+    }
+    questBeingEdited?.let { quest ->
+        QuestEditorDialog(
+            quest = quest,
+            onDismiss = { questBeingEdited = null },
+            onSave = { title, description, tags, difficulty, reward ->
+                onUpdateQuest(quest.copy(
+                    title = title,
+                    description = description,
+                    tags = tags,
+                    difficulty = difficulty,
+                    reward = reward
+                ))
+                questBeingEdited = null
+            }
+        )
     }
 }
 
 @Composable
-private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
+private fun QuestEditorDialog(
+    quest: Quest?,
+    onDismiss: () -> Unit,
+    onSave: (String, String, List<String>, String, Int) -> Unit
+) {
+    var title by remember(quest?.id) { mutableStateOf(quest?.title.orEmpty()) }
+    var description by remember(quest?.id) { mutableStateOf(quest?.description.orEmpty()) }
+    var tags by remember(quest?.id) { mutableStateOf(quest?.tags?.joinToString(", ").orEmpty()) }
+    var difficulty by remember(quest?.id) { mutableStateOf(quest?.difficulty ?: "Easy") }
+    var rewardText by remember(quest?.id) {
+        mutableStateOf(quest?.reward?.toString() ?: "20")
+    }
+    val reward = rewardText.toIntOrNull()
+    val canCreate = title.isNotBlank() && description.isNotBlank() && reward != null && reward > 0
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(if (quest == null) "Create a sidequest" else "Edit sidequest") },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(QuestsTokens.StandardInset)
+            ) {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { title = it },
+                    label = { Text("Quest title") },
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Description") }
+                )
+                OutlinedTextField(
+                    value = tags,
+                    onValueChange = { tags = it },
+                    label = { Text("Tags (comma separated)") },
+                    singleLine = true
+                )
+                Text("Difficulty", color = Green900, fontWeight = FontWeight.Bold)
+                Row(horizontalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
+                    listOf("Easy", "Medium", "Hard").forEach { option ->
+                        TagChip(
+                            text = if (difficulty == option) "✓ $option" else option,
+                            color = if (difficulty == option) Green200 else BeigeBackground,
+                            modifier = Modifier.clickable { difficulty = option }
+                        )
+                    }
+                }
+                OutlinedTextField(
+                    value = rewardText,
+                    onValueChange = { rewardText = it.filter(Char::isDigit) },
+                    label = { Text("Gold reward") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val validReward = reward ?: return@Button
+                    onSave(
+                        title.trim(),
+                        description.trim(),
+                        tags.split(",").map(String::trim).filter(String::isNotEmpty),
+                        difficulty,
+                        validReward
+                    )
+                },
+                enabled = canCreate
+            ) {
+                Text(if (quest == null) "Create" else "Save")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun QuestCard(
+    modifier: Modifier = Modifier,
+    quest: Quest,
+    done: Boolean,
+    onEdit: () -> Unit,
+    onComplete: () -> Unit
+) {
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .clickable(enabled = !done, onClick = onClick),
+            .clickable(enabled = !done, onClick = onEdit),
         shape = RoundedCornerShape(QuestsTokens.QuestCardCornerRadius),
         color = if (done) Green100 else CreamSurface,
         shadowElevation = QuestsTokens.Hairline
@@ -156,20 +379,11 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
             modifier = Modifier.padding(horizontal = QuestsTokens.CardContentInset, vertical = QuestsTokens.CardInset),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                shape = CircleShape,
-                color = if (done) Green700 else Color.Transparent
-            ) {
-                if (done) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_check),
-                        contentDescription = "Completed",
-                        modifier = Modifier
-                            .size(QuestsTokens.CheckmarkText.value.dp)
-                            .padding(top = QuestsTokens.TinyInset)
-                    )
-                }
-            }
+            Checkbox(
+                checked = done,
+                enabled = !done,
+                onCheckedChange = { if (!done) onComplete() }
+            )
             Spacer(Modifier.width(QuestsTokens.ContentInset))
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(QuestsTokens.CompactInset)) {
@@ -204,8 +418,8 @@ private fun QuestCard(quest: Quest, done: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun TagChip(text: String, color: Color) {
-    Surface(shape = CircleShape, color = color) {
+private fun TagChip(text: String, color: Color, modifier: Modifier = Modifier) {
+    Surface(modifier = modifier, shape = CircleShape, color = color) {
         Text(
             text.uppercase(),
             modifier = Modifier.padding(horizontal = QuestsTokens.SmallInset, vertical = QuestsTokens.TightInset),

@@ -97,6 +97,9 @@ fun PlantYourHabitApp(
             addAll(initialHabits)
         }
     }
+    val quests = remember {
+        mutableStateListOf<Quest>().apply { addAll(initialQuests) }
+    }
     var completedQuests by remember { mutableStateOf(setOf<Int>()) }
 
     val ownedTrinkets = remember { mutableStateListOf<Int>() }
@@ -145,6 +148,12 @@ fun PlantYourHabitApp(
                     onSelectPlant = { habitId, plant ->
                         selectedPlants[habitId] = plant
                     },
+                    onCreateHabit = { habit ->
+                        if (habits.size < MAX_HABITS) {
+                            habits.add(habit)
+                            selectedPlants[habit.id] = habit.plant
+                        }
+                    },
                     onToggleHabit = { habit ->
                         val today = LocalDate.now()
                         val done = today.toString() in habit.careDays
@@ -169,11 +178,19 @@ fun PlantYourHabitApp(
                 )
 
                 AppDestinations.QUESTS -> QuestsScreen(
+                    quests = quests,
                     completedQuests = completedQuests,
                     onCompleteQuest = { id, reward ->
                         if (!completedQuests.contains(id)) {
                             completedQuests = completedQuests + id
                             gold += reward
+                        }
+                    },
+                    onCreateQuest = { quest -> quests.add(quest) },
+                    onUpdateQuest = { updatedQuest ->
+                        val questIndex = quests.indexOfFirst { it.id == updatedQuest.id }
+                        if (questIndex >= 0) {
+                            quests[questIndex] = updatedQuest
                         }
                     },
                     modifier = Modifier.weight(1f)
