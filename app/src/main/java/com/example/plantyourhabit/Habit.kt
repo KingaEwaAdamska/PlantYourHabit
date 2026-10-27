@@ -111,11 +111,12 @@ fun exampleCareDays(streakDays: Int): List<String> {
 
     return (count downTo 1)
         .map { daysAgo ->
-            today.minusDays((daysAgo - 1).toLong()).toString()
+            today.minusDays(daysAgo.toLong()).toString()
         }
 }
 
 val initialHabits = listOf(
-    Habit(1, "Morning water", "monstera", 6, exampleCareDays(1)),
-    Habit(2, "Read 20 mins", "fern", 8, exampleCareDays(40))
+    Habit(1, "Morning water", "monstera", 6, exampleCareDays(59)),
+    Habit(2, "No coffee", "monstera", 6, exampleCareDays(59)),
+    Habit(3, "Read 20 mins", "fern", 8, exampleCareDays(59))
 )
