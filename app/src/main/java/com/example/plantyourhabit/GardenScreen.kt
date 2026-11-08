@@ -75,9 +75,6 @@ import com.example.plantyourhabit.ui.theme.ShelfPostWood
 import com.example.plantyourhabit.ui.theme.ShelfPostHighlight
 import com.example.plantyourhabit.ui.theme.ShelfPlankWood
 import com.example.plantyourhabit.ui.theme.ShelfPlankHighlight
-import com.example.plantyourhabit.ui.theme.GardenWindowFrame
-import com.example.plantyourhabit.ui.theme.GardenWindowGlass
-import com.example.plantyourhabit.ui.theme.GardenWindowSun
 import com.example.plantyourhabit.ui.theme.BeigeLight
 import com.example.plantyourhabit.ui.theme.LocalAppDarkTheme
 
@@ -931,115 +928,18 @@ private fun GardenWindow(
     activeBackground: String,
     modifier: Modifier = Modifier
 ) {
-    val windowShape = RoundedCornerShape(
-        topStart = GardenTokens.GardenWindowInnerArchRadius,
-        topEnd = GardenTokens.GardenWindowInnerArchRadius,
-        bottomStart = GardenTokens.TinyInset,
-        bottomEnd = GardenTokens.TinyInset
+    val windowImage = when (activeBackground) {
+        "sunroom" -> R.drawable.window_sunroom
+        "evening" -> R.drawable.window_evening
+        "forest" -> R.drawable.window_forest
+        else -> R.drawable.window_classic
+    }
+    Image(
+        painter = painterResource(windowImage),
+        contentDescription = null,
+        modifier = modifier.size(
+            width = GardenTokens.GardenWindowWidth,
+            height = GardenTokens.GardenWindowHeight
+        )
     )
-    val windowSky = when (activeBackground) {
-        "evening" -> Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
-        "forest" -> Brush.verticalGradient(listOf(Color(0xFFB9C9B1), Color(0xFF6F8B70)))
-        else -> Brush.verticalGradient(listOf(GardenWindowGlass, GardenWindowGlass))
-    }
-    Box(
-        modifier = modifier
-            .size(width = GardenTokens.GardenWindowWidth, height = GardenTokens.GardenWindowHeight)
-            .background(GardenWindowFrame.copy(alpha = GARDEN_WINDOW_FRAME_OPACITY), RoundedCornerShape(topStart = GardenTokens.GardenWindowArchRadius, topEnd = GardenTokens.GardenWindowArchRadius, bottomStart = GardenTokens.TightInset, bottomEnd = GardenTokens.TightInset))
-            .padding(GardenTokens.MicroPadding)
-            .clip(windowShape)
-            .background(windowSky, windowShape)
-    ) {
-        if (activeBackground == "evening") {
-            Canvas(Modifier.fillMaxSize()) {
-                val sunCenter = Offset(size.width * 0.72f, size.height * 0.65f)
-                drawCircle(
-                    color = GardenWindowSun,
-                    radius = size.minDimension * 0.14f,
-                    center = sunCenter
-                )
-                val farHills = Path().apply {
-                    moveTo(0f, size.height * 0.72f)
-                    quadraticTo(size.width * 0.42f, size.height * 0.55f, size.width, size.height * 0.76f)
-                    lineTo(size.width, size.height)
-                    lineTo(0f, size.height)
-                    close()
-                }
-                drawPath(farHills, Color(0xFF9D8790).copy(alpha = 0.55f))
-                val nearHills = Path().apply {
-                    moveTo(0f, size.height * 0.84f)
-                    quadraticTo(size.width * 0.45f, size.height * 0.68f, size.width, size.height * 0.88f)
-                    lineTo(size.width, size.height)
-                    lineTo(0f, size.height)
-                    close()
-                }
-                drawPath(nearHills, Color(0xFF688C5D).copy(alpha = 0.65f))
-            }
-        } else if (activeBackground == "forest") {
-            Canvas(Modifier.fillMaxSize()) {
-                val farForest = Path().apply {
-                    moveTo(0f, size.height * 0.68f)
-                    lineTo(size.width * 0.18f, size.height * 0.26f)
-                    lineTo(size.width * 0.36f, size.height * 0.68f)
-                    lineTo(size.width * 0.53f, size.height * 0.2f)
-                    lineTo(size.width * 0.75f, size.height * 0.68f)
-                    lineTo(size.width * 0.9f, size.height * 0.32f)
-                    lineTo(size.width, size.height * 0.62f)
-                    lineTo(size.width, size.height)
-                    lineTo(0f, size.height)
-                    close()
-                }
-                drawPath(farForest, Color(0xFF789276).copy(alpha = 0.72f))
-
-                val nearForest = Path().apply {
-                    moveTo(0f, size.height * 0.82f)
-                    lineTo(size.width * 0.13f, size.height * 0.45f)
-                    lineTo(size.width * 0.27f, size.height * 0.82f)
-                    lineTo(size.width * 0.43f, size.height * 0.4f)
-                    lineTo(size.width * 0.61f, size.height * 0.82f)
-                    lineTo(size.width * 0.79f, size.height * 0.46f)
-                    lineTo(size.width * 0.96f, size.height * 0.82f)
-                    lineTo(size.width, size.height * 0.76f)
-                    lineTo(size.width, size.height)
-                    lineTo(0f, size.height)
-                    close()
-                }
-                drawPath(nearForest, Color(0xFF496454).copy(alpha = 0.88f))
-            }
-        }
-        Box(
-            Modifier
-                .align(Alignment.Center)
-                .fillMaxHeight()
-                .width(GardenTokens.CompactInset)
-                .background(GardenWindowFrame)
-        )
-        Box(
-            Modifier
-                .align(Alignment.Center)
-                .fillMaxWidth()
-                .height(GardenTokens.CompactInset)
-                .background(GardenWindowFrame)
-        )
-        if (activeBackground != "evening" && activeBackground != "forest") {
-            Box(
-                Modifier
-                .align(Alignment.TopEnd)
-                .padding(
-                    top = GardenTokens.WindowSunTopInset,
-                    end = GardenTokens.WindowSunEndInset
-                )
-                .size(GardenTokens.GardenWindowSunSize)
-                .background(GardenWindowSun, CircleShape)
-            )
-        }
-        Row(
-            modifier = Modifier.align(Alignment.CenterStart).padding(start = GardenTokens.LabelInset),
-            horizontalArrangement = Arrangement.spacedBy(GardenTokens.TightInset)
-        ) {
-            repeat(2) {
-                Box(Modifier.size(width = GardenTokens.HeaderInset, height = GardenTokens.SmallInset).background(Color.White.copy(alpha = GARDEN_WINDOW_DECORATION_OPACITY), CircleShape))
-            }
-        }
-    }
 }

@@ -102,8 +102,6 @@ const val PLANT_GROWTH_ANIMATION_MILLIS = 500
 const val GARDEN_DATE_REFRESH_MILLIS = 60_000L
 
 const val PROGRESS_CIRCLE_DEGREES = 360f
-const val GARDEN_WINDOW_FRAME_OPACITY = 0.75f
-const val GARDEN_WINDOW_DECORATION_OPACITY = 0.55f
 
 fun exampleCareDays(streakDays: Int): List<String> {
     val count = streakDays.coerceIn(0, MAX_STREAK_DAY)
