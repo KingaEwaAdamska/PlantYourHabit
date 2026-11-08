@@ -84,7 +84,6 @@ import com.example.plantyourhabit.ui.theme.LocalAppDarkTheme
 @Composable
 fun GardenScreen(
     habits: List<Habit>,
-    ownedTrinkets: List<Int>,
     activeBackground: String,
     selectedPlants: Map<Int, String>,
     habitSlots: Map<Int, Int>,
@@ -205,10 +204,6 @@ fun GardenScreen(
                     onToggleHabit = onToggleHabit,
                     levelHeight = maxHeight / MAX_HABITS,
                     bottomShelfInset = GardenTokens.CardInset,
-                    modifier = Modifier.fillMaxSize()
-                )
-                GardenTrinkets(
-                    ownedTrinkets = ownedTrinkets,
                     modifier = Modifier.fillMaxSize()
                 )
             }
@@ -359,65 +354,6 @@ private fun AddHabitDialog(
             }
         }
     )
-}
-
-@Composable
-private fun GardenTrinkets(
-    ownedTrinkets: List<Int>,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier) {
-        repeat(MAX_HABITS) { shelfIndex ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-            ) {
-                ownedTrinkets.getOrNull(shelfIndex)?.let { trinketId ->
-                    val drawable = when (trinketId) {
-                        1 -> R.drawable.ic_shop_mushroom
-                        2 -> R.drawable.ic_shop_snail
-                        3 -> R.drawable.ic_shop_lantern
-                        else -> null
-                    }
-                    drawable?.let {
-                        Image(
-                            painter = painterResource(it),
-                            contentDescription = when (trinketId) {
-                                1 -> "Tiny mushroom trinket"
-                                2 -> "Lucky snail trinket"
-                                else -> "Golden lantern trinket"
-                            },
-                            modifier = Modifier
-                                .align(
-                                    if (shelfIndex % 2 == 0) {
-                                        Alignment.BottomStart
-                                    } else {
-                                        Alignment.BottomEnd
-                                    }
-                                )
-                                .offset(
-                                    y = -(
-                                        GardenTokens.ShelfPlankHeight +
-                                            GardenTokens.CompactInset +
-                                            if (shelfIndex == MAX_HABITS - 1) GardenTokens.CardInset
-                                            else GardenTokens.NoElevation
-                                        )
-                                )
-                                .padding(horizontal = GardenTokens.TrinketHorizontalInset)
-                                .size(
-                                    if (trinketId == 3) {
-                                        GardenTokens.LanternDisplaySize
-                                    } else {
-                                        GardenTokens.TrinketDisplaySize
-                                    }
-                                )
-                        )
-                    }
-                }
-            }
-        }
-    }
 }
 
 @Composable

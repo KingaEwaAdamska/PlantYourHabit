@@ -362,15 +362,6 @@ button {
   box-shadow: 0 8px 0 -4px rgba(77, 54, 37, .25);
 }
 
-.shelf-plank > .trinket {
-  display: inline-block;
-  position: relative;
-  top: -38px;
-  margin-left: 8px;
-  transform: scale(.55);
-  transform-origin: bottom;
-}
-
 .shelf-post {
   width: 12px;
   position: absolute;
@@ -827,15 +818,6 @@ button {
   box-shadow: 0 9px 0 -5px rgba(78, 52, 35, 0.3);
 }
 
-.wood-shelf > .trinket {
-  position: relative;
-  display: inline-block;
-  transform: scale(.5);
-  transform-origin: bottom;
-  margin-left: 3px;
-  top: -34px;
-}
-
 .habit-section {
   margin-top: 26px;
 }
@@ -1176,99 +1158,6 @@ button {
   cursor: pointer;
 }
 
-.shop-hero {
-  height: 190px;
-  overflow: hidden;
-  position: relative;
-  border-radius: 27px;
-  background:
-    radial-gradient(circle at 50% 30%, rgba(255,255,255,.55), transparent 40%),
-    #e8d8b5;
-}
-
-.display-plinth {
-  width: 185px;
-  height: 65px;
-  position: absolute;
-  left: 50%;
-  bottom: 15px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: #c69b69;
-  box-shadow: 0 14px 0 #a87950, 0 18px 25px rgba(105, 75, 47, .2);
-}
-
-.display-plinth .trinket {
-  position: absolute;
-  bottom: 40px;
-}
-.display-plinth .mushroom { left: 32px; transform: scale(1.2); }
-.display-plinth .snail { right: 27px; transform: scale(1.15); }
-
-.trinket {
-  width: 62px;
-  height: 60px;
-  position: relative;
-}
-.mushroom .cap {
-  width: 58px; height: 30px;
-  position: absolute; left: 2px; top: 7px;
-  border-radius: 50% 50% 18% 18%;
-  background:
-    radial-gradient(circle at 30% 35%, #f5dca8 0 7%, transparent 8%),
-    radial-gradient(circle at 67% 47%, #f5dca8 0 6%, transparent 7%),
-    #b8634d;
-}
-.mushroom .stalk {
-  width: 22px; height: 30px;
-  position: absolute; left: 20px; top: 30px;
-  border-radius: 4px 4px 12px 12px;
-  background: #efe0bc;
-}
-.snail .body {
-  width: 56px; height: 16px;
-  position: absolute; bottom: 5px; left: 2px;
-  border-radius: 50% 50% 10px 10px;
-  background: #b88652;
-}
-.snail .body::after {
-  content: "";
-  width: 17px; height: 22px;
-  position: absolute; right: 2px; bottom: 6px;
-  border-radius: 50% 50% 35% 20%;
-  background: #b88652;
-}
-.snail .shell {
-  width: 39px; height: 39px;
-  position: absolute; left: 5px; bottom: 10px;
-  z-index: 2;
-  border: 4px solid #d89162;
-  border-radius: 50%;
-  background: radial-gradient(circle, #a95f51 0 18%, #d89162 19% 40%, #a95f51 41% 48%, #d89162 49%);
-}
-.snail .eye {
-  width: 4px; height: 4px;
-  position: absolute; right: 3px; bottom: 25px;
-  z-index: 3;
-  border-radius: 50%;
-  background: #3f493d;
-}
-.star {
-  display: grid;
-  place-items: center;
-  color: #d69d3e;
-  font-size: 57px;
-  line-height: 1;
-  text-shadow: 0 4px 0 #aa7333;
-}
-
-.shop-sparkle {
-  position: absolute;
-  color: rgba(255,255,255,.8);
-}
-.sparkle-left { left: 58px; top: 40px; font-size: 24px; }
-.sparkle-right { right: 52px; top: 25px; font-size: 15px; }
-
 .shop-intro {
   padding: 24px 5px 17px;
   text-align: center;
@@ -1277,12 +1166,6 @@ button {
   max-width: 300px;
   margin-left: auto;
   margin-right: auto;
-}
-
-.shop-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 9px;
 }
 
 .shop-section-heading {
@@ -1308,50 +1191,6 @@ button {
   color: #9aa198;
   font-size: 10px;
   font-weight: 700;
-}
-
-.shop-item {
-  min-width: 0;
-  padding: 10px 7px 12px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  border: 1px solid #e3e2d9;
-  border-radius: 19px;
-  background: #fffdf8;
-  cursor: pointer;
-}
-.shop-item:disabled:not(.owned) {
-  cursor: not-allowed;
-  filter: grayscale(.6);
-  opacity: .55;
-}
-.item-art {
-  width: 100%;
-  height: 79px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px;
-  background: #ece9db;
-}
-.item-art .trinket { transform: scale(.72); }
-.shop-item strong {
-  margin-top: 9px;
-  font-size: 10px;
-  white-space: nowrap;
-}
-.item-price {
-  margin-top: 4px;
-  display: flex;
-  align-items: center;
-  gap: 3px;
-  color: #9a722e;
-  font-size: 9px;
-  font-weight: 700;
-}
-.shop-item.owned {
-  border-color: #97aa96;
-  background: #eef2e8;
 }
 
 .plant-shop-list,
@@ -1920,7 +1759,6 @@ button {
   .screen-content { padding-left: 11px; padding-right: 11px; }
   .topbar { padding-left: 16px; padding-right: 16px; }
   .garden-heading h2 { font-size: 18px; }
-  .shop-grid { gap: 5px; }
 }
 
 @media (max-height: 740px) {

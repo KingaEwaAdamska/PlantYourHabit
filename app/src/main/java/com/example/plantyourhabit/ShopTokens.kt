@@ -18,7 +18,6 @@ object ShopTokens {
     val NavigationTitleText = 16.sp
     val NoElevation = 0.dp
     val PageInset = 16.dp
-    val ProductCardArtText = 36.sp
     val ProductDecorationInset = 21.dp
     val QuestHeroText = 24.sp
     val SectionInset = 18.dp
@@ -26,16 +25,11 @@ object ShopTokens {
     val ShopBackgroundCardCornerRadius = 18.dp
     val ShopCardRadius = 19.dp
     val ShopIllustrationHeight = 150.dp
-    val ShopMushroomText = 42.sp
     val ShopPlantArtText = 32.sp
     val ShopPlantPreviewCornerRadius = 15.dp
     val ShopPlantPreviewSize = 66.dp
     val ShopProductArtText = 25.sp
-    val ShopProductPreviewCornerRadius = 13.dp
     val ShopProductPreviewHeight = 78.dp
-    val ShopSnailArtText = 40.sp
-    val ShopStarInnerInset = 28.dp
-    val ShopStarOuterInset = 24.dp
     val ShopTitleText = 19.sp
     val SmallInset = 6.dp
     val SmallLabelText = 8.sp

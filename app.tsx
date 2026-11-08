@@ -139,12 +139,6 @@ const difficultyRewards: Record<QuestDifficulty, number> = {
   Hard: 40,
 };
 
-const shopItems = [
-  { id: 1, name: "Tiny mushroom", price: 40, art: "mushroom" },
-  { id: 2, name: "Lucky snail", price: 65, art: "snail" },
-  { id: 3, name: "Golden star", price: 90, art: "star" },
-];
-
 const plantShopItems = [
   { type: "bloom", name: "Coral blossom", price: 70 },
   { type: "cactus", name: "Desert cactus", price: 85 },
@@ -175,34 +169,12 @@ function Plant({ type, done }: { type: string; done: boolean }) {
   );
 }
 
-function Trinket({ type }: { type: string }) {
-  if (type === "mushroom") {
-    return (
-      <div className="trinket mushroom">
-        <span className="cap" />
-        <span className="stalk" />
-      </div>
-    );
-  }
-  if (type === "snail") {
-    return (
-      <div className="trinket snail">
-        <span className="shell" />
-        <span className="body" />
-        <span className="eye" />
-      </div>
-    );
-  }
-  return <div className="trinket star">✦</div>;
-}
-
 export default function App() {
   const [activeTab, setActiveTab] = useState<"garden" | "quests" | "shop">("garden");
   const [completedHabits, setCompletedHabits] = useState<number[]>([1]);
   const [completedQuests, setCompletedQuests] = useState<number[]>([]);
   const [quests, setQuests] = useState<Quest[]>(initialQuests);
   const [gold, setGold] = useState(120);
-  const [owned, setOwned] = useState<number[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [questTitle, setQuestTitle] = useState("");
   const [questDescription, setQuestDescription] = useState("");
@@ -266,12 +238,6 @@ export default function App() {
     setShowAdd(false);
   };
 
-  const buyItem = (id: number, price: number) => {
-    if (gold < price || owned.includes(id)) return;
-    setGold((value) => value - price);
-    setOwned((current) => [...current, id]);
-  };
-
   const buyPlantType = (type: string, price: number) => {
     if (gold < price || ownedPlantTypes.includes(type)) return;
     setGold((value) => value - price);
@@ -305,7 +271,7 @@ export default function App() {
                 ? "Good morning, Mia"
                 : activeTab === "quests"
                   ? "Quests"
-                  : "Trinket shop"}
+                  : "Garden shop"}
             </h1>
           </div>
           <div className="gold-pill" aria-label={`${gold} gold`}>
@@ -327,7 +293,7 @@ export default function App() {
                     <span>{completedHabits.length}/{habits.length}</span>
                   </div>
                 </div>
-                <p>Care for each plant, or make it feel more like yours.</p>
+                <p>Care for each plant, or make your garden feel more like yours.</p>
               </div>
 
               <div className={`tall-shelf garden-theme-${activeBackground}`}>
@@ -363,12 +329,7 @@ export default function App() {
                           <Icon name="check" size={17} strokeWidth={2.5} />
                         </button>
                       </div>
-                      <div className="shelf-plank">
-                        {index === 1 && owned.slice(0, 2).map((itemId) => {
-                          const item = shopItems.find((shopItem) => shopItem.id === itemId);
-                          return item ? <Trinket key={item.id} type={item.art} /> : null;
-                        })}
-                      </div>
+                      <div className="shelf-plank" />
                     </div>
                   );
                 })}
@@ -384,7 +345,7 @@ export default function App() {
                 </button>
                 <button onClick={() => setActiveTab("shop")}>
                   <Icon name="shop" size={18} />
-                  Find trinkets
+                  Explore the shop
                 </button>
               </div>
             </section>
@@ -441,49 +402,10 @@ export default function App() {
 
           {activeTab === "shop" && (
             <section className="page-panel">
-              <div className="shop-hero">
-                <span className="shop-sparkle sparkle-left">✦</span>
-                <div className="display-plinth">
-                  <Trinket type="mushroom" />
-                  <Trinket type="snail" />
-                </div>
-                <span className="shop-sparkle sparkle-right">✦</span>
-              </div>
               <div className="shop-intro">
                 <span className="section-kicker">MAKE IT YOURS</span>
                 <h2>Find something lovely</h2>
-                <p>Spend the gold you earn on tiny treasures for your garden shelf.</p>
-              </div>
-              <div className="shop-section-heading">
-                <div>
-                  <span className="section-kicker">FOR YOUR SHELF</span>
-                  <h3>Tiny trinkets</h3>
-                </div>
-                <span>{owned.length}/{shopItems.length}</span>
-              </div>
-              <div className="shop-grid">
-                {shopItems.map((item) => {
-                  const isOwned = owned.includes(item.id);
-                  const canAfford = gold >= item.price;
-                  return (
-                    <button
-                      className={`shop-item ${isOwned ? "owned" : ""}`}
-                      key={item.id}
-                      onClick={() => buyItem(item.id, item.price)}
-                      disabled={isOwned || !canAfford}
-                    >
-                      <span className="item-art"><Trinket type={item.art} /></span>
-                      <strong>{item.name}</strong>
-                      <span className="item-price">
-                        {isOwned ? (
-                          <>On shelf <Icon name="check" size={14} /></>
-                        ) : (
-                          <><Icon name="coin" size={14} /> {item.price}</>
-                        )}
-                      </span>
-                    </button>
-                  );
-                })}
+                <p>Spend the gold you earn on new plants and garden backgrounds.</p>
               </div>
 
               <div className="shop-section-heading">
@@ -560,7 +482,7 @@ export default function App() {
               </div>
               <div className="shop-note">
                 <Icon name="sparkle" size={18} />
-                New treasures arrive every Sunday
+                New garden styles arrive every Sunday
               </div>
             </section>
           )}

@@ -67,7 +67,7 @@ fun AppHeader(
                 text = when (destination) {
                     AppDestinations.GARDEN -> "Garden"
                     AppDestinations.QUESTS -> "Quests"
-                    AppDestinations.SHOP -> "Trinket shop"
+                    AppDestinations.SHOP -> "Garden shop"
                 },
                 color = Green900,
                 fontFamily = FontFamily.Serif,
