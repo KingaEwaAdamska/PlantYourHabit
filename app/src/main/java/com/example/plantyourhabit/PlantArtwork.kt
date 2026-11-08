@@ -55,15 +55,23 @@ internal fun PlantArtwork(
     }
 
     val vitality = (animatedStage / MAX_STREAK_DAY).coerceIn(0f, 1f)
-    val plantScale = .68f + .32f * vitality
+    val plantScale = plantGrowthScale(type, vitality)
     val plantColorFilter = remember(type, vitality) { vitalityColorFilter(type, vitality) }
     val plantModifier = Modifier
         .fillMaxSize()
         .graphicsLayer {
-            scaleX = if (type == "fern") 1.25f else plantScale
-            scaleY = plantScale
+            scaleX = plantScale.scaleX
+            scaleY = plantScale.scaleY
             transformOrigin = TransformOrigin(.5f, .78f)
         }
+    val renderState = PlantRenderState(
+        type = type,
+        habit = habit,
+        today = today,
+        animatedStage = animatedStage,
+        colorFilter = plantColorFilter,
+        modifier = plantModifier
+    )
 
     Box(modifier, contentAlignment = Alignment.BottomCenter) {
         Canvas(Modifier.fillMaxSize()) {
@@ -86,45 +94,130 @@ internal fun PlantArtwork(
             }
         }
 
-        if (type == "monstera" && animatedStage > 0f) {
-            PlantPot(type)
-        }
-
-        val plantResource = if (animatedStage <= 0f) {
-            if (habit.hasCareHistory(today)) R.drawable.ic_plant_withered else R.drawable.ic_plant_seed
-        } else {
-            plantDrawable(type)
-        }
-        Image(
-            painter = painterResource(plantResource),
-            contentDescription = null,
-            contentScale = ContentScale.FillBounds,
-            colorFilter = if (animatedStage > 0f) plantColorFilter else null,
-            modifier = plantModifier
-        )
-
-        val bloomStart = MAX_STREAK_DAY * FLOWER_BLOOM_START_FRACTION
-        if (type != "chinese_money_plant" && type != "succulent" && type != "monstera" && type != "fern" && animatedStage >= bloomStart) {
-            val bloomAlpha = ((animatedStage - bloomStart) /
-                (MAX_STREAK_DAY * (1f - FLOWER_BLOOM_START_FRACTION))).coerceIn(0f, 1f)
-            Image(
-                painter = painterResource(
-                    when (type) {
-                        "cactus" -> R.drawable.ic_plant_cactus_bloom
-                        "orchid" -> R.drawable.ic_plant_orchid_head
-                        else -> R.drawable.ic_plant_mature_bloom
-                    }
-                ),
-                contentDescription = null,
-                contentScale = ContentScale.FillBounds,
-                modifier = plantModifier.graphicsLayer { alpha = bloomAlpha }
-            )
-        }
-
-        if (type != "monstera" || animatedStage <= 0f) {
-            PlantPot(type)
-        }
+        PlantScene(renderState)
     }
+}
+
+private data class PlantRenderState(
+    val type: String,
+    val habit: Habit,
+    val today: LocalDate,
+    val animatedStage: Float,
+    val colorFilter: ColorFilter,
+    val modifier: Modifier
+)
+
+@Composable
+private fun PlantScene(state: PlantRenderState) {
+    when (state.type) {
+        "cactus" -> CactusArtwork(state)
+        "chinese_money_plant" -> ChineseMoneyPlantArtwork(state)
+        "fern" -> FernArtwork(state)
+        "monstera" -> MonsteraArtwork(state)
+        "orchid" -> OrchidArtwork(state)
+        "succulent" -> SucculentArtwork(state)
+        else -> GenericPlantArtwork(state)
+    }
+}
+
+@Composable
+private fun CactusArtwork(state: PlantRenderState) {
+    PlantBody(state, R.drawable.ic_plant_cactus)
+    CactusBloom(state)
+    PlantPot("cactus")
+}
+
+@Composable
+private fun ChineseMoneyPlantArtwork(state: PlantRenderState) {
+    PlantBody(state, R.drawable.ic_plant_chinese_money_plant)
+    PlantPot("chinese_money_plant")
+}
+
+@Composable
+private fun FernArtwork(state: PlantRenderState) {
+    PlantBody(state, R.drawable.ic_plant_fern)
+    PlantPot("fern")
+}
+
+@Composable
+private fun MonsteraArtwork(state: PlantRenderState) {
+    if (state.animatedStage > 0f) {
+        PlantPot("monstera")
+    }
+    PlantBody(state, R.drawable.ic_plant_monstera)
+    if (state.animatedStage <= 0f) {
+        PlantPot("monstera")
+    }
+}
+
+@Composable
+private fun OrchidArtwork(state: PlantRenderState) {
+    PlantBody(state, R.drawable.ic_plant_orchid)
+    OrchidBloom(state)
+    PlantPot("orchid")
+}
+
+@Composable
+private fun SucculentArtwork(state: PlantRenderState) {
+    PlantBody(state, R.drawable.ic_plant_succulent)
+    PlantPot("succulent")
+}
+
+@Composable
+private fun GenericPlantArtwork(state: PlantRenderState) {
+    PlantBody(state, R.drawable.ic_plant_generic)
+    GenericMatureBloom(state)
+    PlantPot(state.type)
+}
+
+@Composable
+private fun PlantBody(state: PlantRenderState, drawable: Int) {
+    val resource = if (state.animatedStage <= 0f) {
+        if (state.habit.hasCareHistory(state.today)) {
+            R.drawable.ic_plant_withered
+        } else {
+            R.drawable.ic_plant_seed
+        }
+    } else {
+        drawable
+    }
+    Image(
+        painter = painterResource(resource),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        colorFilter = if (state.animatedStage > 0f) state.colorFilter else null,
+        modifier = state.modifier
+    )
+}
+
+@Composable
+private fun CactusBloom(state: PlantRenderState) {
+    MatureBloom(state, R.drawable.ic_plant_cactus_bloom)
+}
+
+@Composable
+private fun OrchidBloom(state: PlantRenderState) {
+    MatureBloom(state, R.drawable.ic_plant_orchid_head)
+}
+
+@Composable
+private fun GenericMatureBloom(state: PlantRenderState) {
+    MatureBloom(state, R.drawable.ic_plant_mature_bloom)
+}
+
+@Composable
+private fun MatureBloom(state: PlantRenderState, drawable: Int) {
+    val bloomStart = MAX_STREAK_DAY * FLOWER_BLOOM_START_FRACTION
+    if (state.animatedStage < bloomStart) return
+
+    val bloomAlpha = ((state.animatedStage - bloomStart) /
+        (MAX_STREAK_DAY * (1f - FLOWER_BLOOM_START_FRACTION))).coerceIn(0f, 1f)
+    Image(
+        painter = painterResource(drawable),
+        contentDescription = null,
+        contentScale = ContentScale.FillBounds,
+        modifier = state.modifier.graphicsLayer { alpha = bloomAlpha }
+    )
 }
 
 @Composable
@@ -137,14 +230,41 @@ private fun PlantPot(type: String) {
     )
 }
 
-private fun plantDrawable(type: String): Int = when (type) {
-    "cactus" -> R.drawable.ic_plant_cactus
-    "chinese_money_plant" -> R.drawable.ic_plant_chinese_money_plant
-    "orchid" -> R.drawable.ic_plant_orchid
-    "monstera" -> R.drawable.ic_plant_monstera
-    "succulent" -> R.drawable.ic_plant_succulent
-    "fern" -> R.drawable.ic_plant_fern
-    else -> R.drawable.ic_plant_generic
+private data class PlantGrowthScale(
+    val scaleX: Float,
+    val scaleY: Float
+)
+
+private fun plantGrowthScale(type: String, vitality: Float): PlantGrowthScale = when (type) {
+    "cactus" -> cactusGrowthScale(vitality)
+    "chinese_money_plant" -> chineseMoneyPlantGrowthScale(vitality)
+    "fern" -> fernGrowthScale(vitality)
+    "monstera" -> monsteraGrowthScale(vitality)
+    "orchid" -> orchidGrowthScale(vitality)
+    "succulent" -> succulentGrowthScale(vitality)
+    else -> genericGrowthScale(vitality)
+}
+
+private fun cactusGrowthScale(vitality: Float) = uniformGrowthScale(vitality)
+
+private fun chineseMoneyPlantGrowthScale(vitality: Float) = uniformGrowthScale(vitality)
+
+private fun fernGrowthScale(vitality: Float) = PlantGrowthScale(
+    scaleX = 1.25f,
+    scaleY = uniformGrowthScale(vitality).scaleY
+)
+
+private fun monsteraGrowthScale(vitality: Float) = uniformGrowthScale(vitality)
+
+private fun orchidGrowthScale(vitality: Float) = uniformGrowthScale(vitality)
+
+private fun succulentGrowthScale(vitality: Float) = uniformGrowthScale(vitality)
+
+private fun genericGrowthScale(vitality: Float) = uniformGrowthScale(vitality)
+
+private fun uniformGrowthScale(vitality: Float): PlantGrowthScale {
+    val scale = .68f + .32f * vitality
+    return PlantGrowthScale(scaleX = scale, scaleY = scale)
 }
 
 private fun potDrawable(type: String): Int = when (type) {
