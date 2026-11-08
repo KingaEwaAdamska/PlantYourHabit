@@ -80,7 +80,8 @@ class MainActivity : ComponentActivity() {
                     onToggleTheme = {
                         darkTheme = !darkTheme
                         preferences.edit().putBoolean("dark_theme", darkTheme).apply()
-                    }
+                    },
+                    showIntroOnLaunch = true
                 )
             }
         }
@@ -91,7 +92,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun PlantYourHabitApp(
     darkTheme: Boolean = false,
-    onToggleTheme: () -> Unit = {}
+    onToggleTheme: () -> Unit = {},
+    showIntroOnLaunch: Boolean = false
 ) {
     val context = LocalContext.current
     val habitSoundPool = remember(context) {
@@ -177,31 +179,33 @@ fun PlantYourHabitApp(
         mutableStateOf("classic")
     }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        bottomBar = {
-            CustomNavigationBar(
-                currentDestination = currentDestination,
-                onDestinationSelected = { destination ->
-                    currentDestination = destination
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            AppHeader(
-                destination = currentDestination,
-                gold = gold,
-                darkTheme = darkTheme,
-                onToggleTheme = onToggleTheme
-            )
+    var showIntro by rememberSaveable { mutableStateOf(showIntroOnLaunch) }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                CustomNavigationBar(
+                    currentDestination = currentDestination,
+                    onDestinationSelected = { destination ->
+                        currentDestination = destination
+                    }
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
+                AppHeader(
+                    destination = currentDestination,
+                    gold = gold,
+                    darkTheme = darkTheme,
+                    onToggleTheme = onToggleTheme
+                )
 
-            when (currentDestination) {
-                AppDestinations.GARDEN -> GardenScreen(
+                when (currentDestination) {
+                    AppDestinations.GARDEN -> GardenScreen(
                     habits = habits,
                     ownedTrinkets = ownedTrinkets,
                     activeBackground = activeBackground,
@@ -266,7 +270,7 @@ fun PlantYourHabitApp(
                     modifier = Modifier.weight(1f)
                 )
 
-                AppDestinations.QUESTS -> QuestsScreen(
+                    AppDestinations.QUESTS -> QuestsScreen(
                     quests = quests,
                     completedQuests = completedQuests,
                     onCompleteQuest = { id, reward ->
@@ -285,7 +289,7 @@ fun PlantYourHabitApp(
                     modifier = Modifier.weight(1f)
                 )
 
-                AppDestinations.SHOP -> ShopScreen(
+                    AppDestinations.SHOP -> ShopScreen(
                     gold = gold,
                     ownedTrinkets = ownedTrinkets,
                     ownedPlants = ownedPlants,
@@ -314,7 +318,11 @@ fun PlantYourHabitApp(
                     },
                     modifier = Modifier.weight(1f)
                 )
+                }
             }
+        }
+        if (showIntro) {
+            PlantIntroVideo(onFinished = { showIntro = false })
         }
     }
 }
