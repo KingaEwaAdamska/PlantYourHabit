@@ -18,8 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,9 +54,6 @@ private val DarkShopCardOwned = Color(0xFF454B48)
 private val DarkShopIconSurface = Color(0xFF747876)
 
 private enum class ShopArt(val drawable: Int) {
-    MUSHROOM(R.drawable.ic_shop_mushroom),
-    SNAIL(R.drawable.ic_shop_snail),
-    LANTERN(R.drawable.ic_shop_lantern),
     BLOSSOM(R.drawable.ic_shop_blossom),
     CACTUS(R.drawable.ic_shop_cactus),
     LAVENDER(R.drawable.ic_shop_lavender),
@@ -74,12 +69,6 @@ private data class ShopProduct(val id: Int, val name: String, val price: Int, va
 private fun ShopArtwork(art: ShopArt, modifier: Modifier = Modifier) {
     Image(painterResource(art.drawable), contentDescription = null, modifier = modifier)
 }
-
-private val trinkets = listOf(
-    ShopProduct(1, "Tiny mushroom", 40, ShopArt.MUSHROOM),
-    ShopProduct(2, "Lucky snail", 65, ShopArt.SNAIL),
-    ShopProduct(3, "Golden lantern", 90, ShopArt.LANTERN)
-)
 
 private val plantProducts = listOf(
     ShopProduct(1, "Coral blossom", 70, ShopArt.BLOSSOM),
@@ -104,11 +93,9 @@ private fun backgroundKey(id: Int): String = when (id) {
 @Composable
 fun ShopScreen(
     gold: Int,
-    ownedTrinkets: List<Int>,
     ownedPlants: List<String>,
     ownedBackgrounds: List<String>,
     activeBackground: String,
-    onBuyTrinket: (Int, Int) -> Unit,
     onBuyPlant: (String, Int) -> Unit,
     onSelectBackground: (String, Int) -> Unit,
     modifier: Modifier = Modifier
@@ -139,26 +126,12 @@ fun ShopScreen(
                 fontWeight = FontWeight.SemiBold
             )
             Text(
-                "Spend the gold you earn on tiny treasures for your garden shelf.",
+                "Spend the gold you earn on new plants and garden backgrounds.",
                 modifier = Modifier.padding(top = ShopTokens.LabelInset),
                 color = TextSecondary,
                 fontSize = ShopTokens.BodyText,
                 lineHeight = ShopTokens.SupportingTitleText
             )
-        }
-        ShopSectionHeading("FOR YOUR SHELF", "Tiny trinkets", "${ownedTrinkets.size}/${trinkets.size}")
-        Row(horizontalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
-            trinkets.forEach { product ->
-                val owned = product.id in ownedTrinkets
-                val canAfford = gold >= product.price
-                ProductCard(
-                    product = product,
-                    owned = owned,
-                    canAfford = canAfford,
-                    modifier = Modifier.weight(1f),
-                    onClick = { onBuyTrinket(product.id, product.price) }
-                )
-            }
         }
         ShopSectionHeading("NEW VARIETIES", "Plants to grow", "${ownedPlants.size}/${plantProducts.size}")
         Column(verticalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
@@ -216,55 +189,6 @@ fun ShopScreen(
     }
 }
 }
-}
-
-@Composable
-private fun ProductCard(
-    product: ShopProduct,
-    owned: Boolean,
-    canAfford: Boolean,
-    modifier: Modifier,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = modifier.clickable(enabled = !owned && canAfford, onClick = onClick),
-        shape = RoundedCornerShape(ShopTokens.ShopCardRadius),
-        color = if (LocalAppDarkTheme.current) {
-            if (owned) DarkShopCardOwned else DarkShopCardSurface
-        } else if (owned) Green100 else CreamSurface
-    ) {
-        Column(
-            modifier = Modifier.padding(ShopTokens.StandardInset),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ShopTokens.ShopProductPreviewHeight)
-                    .background(
-                        if (LocalAppDarkTheme.current) DarkShopIconSurface else BeigeBackground,
-                        RoundedCornerShape(ShopTokens.ShopProductPreviewCornerRadius)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                ShopArtwork(product.art, Modifier.fillMaxSize().padding(ShopTokens.SmallInset))
-            }
-            Text(
-                product.name,
-                modifier = Modifier.padding(top = ShopTokens.StandardInset),
-                color = Green900,
-                fontWeight = FontWeight.Bold,
-                fontSize = ShopTokens.SupportingText
-            )
-            Text(
-                if (owned) "On shelf" else "Gold · ${product.price}",
-                modifier = Modifier.padding(top = ShopTokens.CompactInset),
-                color = if (owned) Green700 else Gold700,
-                fontWeight = FontWeight.Bold,
-                fontSize = ShopTokens.CaptionText
-            )
-        }
-    }
 }
 
 @Composable
