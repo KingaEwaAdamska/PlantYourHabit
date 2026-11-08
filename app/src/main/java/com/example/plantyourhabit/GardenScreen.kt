@@ -152,6 +152,7 @@ fun GardenScreen(
             )
             Row(
                 modifier = Modifier
+
                     .fillMaxWidth()
                     .background(BeigeLight)
                     .padding(horizontal = GardenTokens.CardContentInset, vertical = GardenTokens.ComfortableInset),

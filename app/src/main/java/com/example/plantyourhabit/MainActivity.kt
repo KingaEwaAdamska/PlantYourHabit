@@ -29,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -96,6 +97,10 @@ fun PlantYourHabitApp(
     showIntroOnLaunch: Boolean = false
 ) {
     val context = LocalContext.current
+    val appStateStore = remember(context) {
+        AppStateStore(context.applicationContext)
+    }
+    val savedAppState = remember(appStateStore) { appStateStore.load() }
     val habitSoundPool = remember(context) {
         SoundPool.Builder()
             .setMaxStreams(1)
@@ -147,7 +152,7 @@ fun PlantYourHabitApp(
     var currentDestination by rememberSaveable {
         mutableStateOf(AppDestinations.GARDEN)
     }
-    var gold by rememberSaveable { mutableStateOf(STARTING_GOLD_BALANCE) }
+    var gold by remember { mutableStateOf(savedAppState.gold) }
     val habits = remember {
         mutableStateListOf<Habit>().apply {
             addAll(initialHabits)
@@ -162,11 +167,13 @@ fun PlantYourHabitApp(
     }
     var completedHabit by remember { mutableStateOf<Habit?>(null) }
     val quests = remember {
-        mutableStateListOf<Quest>().apply { addAll(initialQuests) }
+        mutableStateListOf<Quest>().apply { addAll(savedAppState.quests) }
     }
-    var completedQuests by remember { mutableStateOf(setOf<Int>()) }
+    var completedQuests by remember { mutableStateOf(savedAppState.completedQuestIds) }
 
-    val ownedPlants = remember { mutableStateListOf<PlantType>() }
+    val ownedPlants = remember {
+        mutableStateListOf<PlantType>().apply { addAll(savedAppState.ownedPlants) }
+    }
     val selectedPlants = remember {
         mutableStateMapOf(
             1 to PlantType.MONSTERA,
@@ -175,11 +182,23 @@ fun PlantYourHabitApp(
         )
     }
     val ownedBackgrounds = remember {
-        mutableStateListOf("classic")
+        mutableStateListOf<String>().apply { addAll(savedAppState.ownedBackgrounds) }
     }
 
-    var activeBackground by rememberSaveable {
-        mutableStateOf("classic")
+    var activeBackground by remember {
+        mutableStateOf(savedAppState.activeBackground)
+    }
+
+    val stateToPersist = PersistedAppState(
+        gold = gold,
+        quests = quests.toList(),
+        completedQuestIds = completedQuests,
+        ownedPlants = ownedPlants.toList(),
+        ownedBackgrounds = ownedBackgrounds.toList(),
+        activeBackground = activeBackground
+    )
+    LaunchedEffect(stateToPersist) {
+        appStateStore.save(stateToPersist)
     }
 
     var showIntro by rememberSaveable { mutableStateOf(showIntroOnLaunch) }
