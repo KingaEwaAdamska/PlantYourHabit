@@ -166,9 +166,13 @@ fun PlantYourHabitApp(
     }
     var completedQuests by remember { mutableStateOf(setOf<Int>()) }
 
-    val ownedPlants = remember { mutableStateListOf<String>() }
+    val ownedPlants = remember { mutableStateListOf<PlantType>() }
     val selectedPlants = remember {
-        mutableStateMapOf(1 to "monstera", 2 to "fern", 3 to "succulent")
+        mutableStateMapOf(
+            1 to PlantType.MONSTERA,
+            2 to PlantType.FERN,
+            3 to PlantType.SUCCULENT
+        )
     }
     val ownedBackgrounds = remember {
         mutableStateListOf("classic")
@@ -209,7 +213,7 @@ fun PlantYourHabitApp(
                     activeBackground = activeBackground,
                     selectedPlants = selectedPlants,
                     habitSlots = habitSlots,
-                    availablePlants = listOf("monstera", "fern", "succulent") + ownedPlants,
+                    availablePlants = listOf(PlantType.MONSTERA, PlantType.FERN, PlantType.SUCCULENT) + ownedPlants,
                     onSelectPlant = { habitId, plant ->
                         selectedPlants[habitId] = plant
                     },
@@ -292,10 +296,10 @@ fun PlantYourHabitApp(
                     ownedPlants = ownedPlants,
                     ownedBackgrounds = ownedBackgrounds,
                     activeBackground = activeBackground,
-                    onBuyPlant = { id, price ->
-                        if (id !in ownedPlants && gold >= price) {
+                    onBuyPlant = { plant, price ->
+                        if (plant !in ownedPlants && gold >= price) {
                             gold -= price
-                            ownedPlants.add(id)
+                            ownedPlants.add(plant)
                         }
                     },
                     onSelectBackground = { id, price ->

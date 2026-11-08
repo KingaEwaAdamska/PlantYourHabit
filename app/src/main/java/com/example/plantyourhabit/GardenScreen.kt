@@ -47,10 +47,10 @@ import com.example.plantyourhabit.ui.theme.LocalAppDarkTheme
 fun GardenScreen(
     habits: List<Habit>,
     activeBackground: String,
-    selectedPlants: Map<Int, String>,
+    selectedPlants: Map<Int, PlantType>,
     habitSlots: Map<Int, Int>,
-    availablePlants: List<String>,
-    onSelectPlant: (Int, String) -> Unit,
+    availablePlants: List<PlantType>,
+    onSelectPlant: (Int, PlantType) -> Unit,
     onCreateHabit: (Habit) -> Unit,
     completedHabit: Habit?,
     onCompletionAcknowledged: () -> Unit,
@@ -197,7 +197,7 @@ fun GardenScreen(
               onCreate = { name ->
                   if (habits.size < MAX_HABITS) {
                       val nextId = (habits.maxOfOrNull(Habit::id) ?: 0) + 1
-                      onCreateHabit(Habit(nextId, name, "succulent", 6))
+                      onCreateHabit(Habit(nextId, name, PlantType.SUCCULENT, 6))
                   }
                   showAddHabitDialog = false
               }

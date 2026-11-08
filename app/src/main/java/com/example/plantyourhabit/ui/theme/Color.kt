@@ -3,6 +3,7 @@ package com.example.plantyourhabit.ui.theme
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.example.plantyourhabit.PlantType
 
 // Primary — naturalna, leśna zieleń
 private val LightGreen900 = Color(0xFF26392F)
@@ -232,12 +233,12 @@ object FlowerPalettes {
         orchidDark = Color(0xFF8F5DA8)
     )
 
-    fun forPlant(type: String): FlowerPalette = when (type) {
-        "fern" -> Fern
-        "succulent" -> Succulent
-        "chinese_money_plant" -> ChineseMoneyPlant
-        "orchid" -> OrchidPlant
-        "cactus" -> Cactus
-        else -> Monstera
+    fun forPlant(type: PlantType): FlowerPalette = when (type) {
+        PlantType.MONSTERA -> Monstera
+        PlantType.FERN -> Fern
+        PlantType.SUCCULENT -> Succulent
+        PlantType.CHINESE_MONEY_PLANT -> ChineseMoneyPlant
+        PlantType.CACTUS -> Cactus
+        PlantType.ORCHID -> OrchidPlant
     }
 }

@@ -68,10 +68,10 @@ internal fun AddHabitDialog(
 @Composable
 internal fun PlantPickerDialog(
     habit: Habit,
-    availablePlants: List<String>,
-    selectedPlant: String,
+    availablePlants: List<PlantType>,
+    selectedPlant: PlantType,
     onDismiss: () -> Unit,
-    onSelect: (String) -> Unit
+    onSelect: (PlantType) -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -100,7 +100,7 @@ internal fun PlantPickerDialog(
                             modifier = Modifier.size(GardenTokens.PlantPreviewWidth, GardenTokens.PlantPickerPreviewHeight)
                         )
                         Text(
-                            plant.displayName(),
+                            plant.displayName,
                             modifier = Modifier.weight(1f).padding(start = GardenTokens.ContentInset),
                             color = Green900,
                             fontWeight = FontWeight.Medium
@@ -123,14 +123,4 @@ internal fun PlantPickerDialog(
             }
         }
     )
-}
-
-private fun String.displayName(): String = when (this) {
-    "monstera" -> "Monstera"
-    "fern" -> "Fern"
-    "succulent" -> "Succulent"
-    "chinese_money_plant" -> "Chinese money plant"
-    "cactus" -> "Desert cactus"
-    "orchid" -> "Orchid"
-    else -> replaceFirstChar { it.uppercase() }
 }

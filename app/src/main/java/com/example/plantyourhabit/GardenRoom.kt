@@ -52,7 +52,7 @@ import com.example.plantyourhabit.ui.theme.TextMuted
 internal fun GardenRoom(
     habits: List<Habit>,
     activeBackground: String,
-    selectedPlants: Map<Int, String>,
+    selectedPlants: Map<Int, PlantType>,
     habitSlots: Map<Int, Int>,
     today: LocalDate,
     onEditPlant: (Int) -> Unit,
@@ -135,7 +135,7 @@ private fun GardenPlants(
     habits: List<Habit>,
     habitSlots: Map<Int, Int>,
     today: LocalDate,
-    selectedPlants: Map<Int, String>,
+    selectedPlants: Map<Int, PlantType>,
     onEditPlant: (Int) -> Unit,
     onToggleHabit: (Habit) -> Unit,
     levelHeight: androidx.compose.ui.unit.Dp,
@@ -315,7 +315,7 @@ private fun ShelfPlank(modifier: Modifier = Modifier) {
 
 @Composable
 private fun GardenPlant(
-    type: String,
+    type: PlantType,
     habit: Habit,
     today: LocalDate,
     modifier: Modifier = Modifier,

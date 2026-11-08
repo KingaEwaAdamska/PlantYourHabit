@@ -93,10 +93,10 @@ private fun backgroundKey(id: Int): String = when (id) {
 @Composable
 fun ShopScreen(
     gold: Int,
-    ownedPlants: List<String>,
+    ownedPlants: List<PlantType>,
     ownedBackgrounds: List<String>,
     activeBackground: String,
-    onBuyPlant: (String, Int) -> Unit,
+    onBuyPlant: (PlantType, Int) -> Unit,
     onSelectBackground: (String, Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -136,12 +136,12 @@ fun ShopScreen(
         ShopSectionHeading("NEW VARIETIES", "Plants to grow", "${ownedPlants.size}/${plantProducts.size}")
         Column(verticalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
             plantProducts.forEach { product ->
-                val id = when (product.id) {
-                    1 -> "chinese_money_plant"
-                    2 -> "cactus"
-                    else -> "orchid"
+                val plantType = when (product.id) {
+                    1 -> PlantType.CHINESE_MONEY_PLANT
+                    2 -> PlantType.CACTUS
+                    else -> PlantType.ORCHID
                 }
-                val owned = id in ownedPlants
+                val owned = plantType in ownedPlants
                 ShopListRow(
                     art = product.art,
                     eyebrow = if (owned) "IN YOUR COLLECTION" else null,
@@ -149,7 +149,7 @@ fun ShopScreen(
                     price = product.price,
                     owned = owned,
                     canAfford = gold >= product.price,
-                    onClick = { onBuyPlant(id, product.price) }
+                    onClick = { onBuyPlant(plantType, product.price) }
                 )
             }
         }
