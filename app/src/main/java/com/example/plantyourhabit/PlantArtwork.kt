@@ -259,14 +259,14 @@ private fun potDrawable(type: PlantType): Int = when (type) {
 
 private fun vitalityColorFilter(type: PlantType, vitality: Float): ColorFilter {
     val palette = FlowerPalettes.forPlant(type)
-    fun channelScale(healthy: Float, withered: Float): Float =
-        1f + ((withered / healthy) - 1f) * (1f - vitality)
+    fun channelScale(young: Float, mature: Float): Float =
+        1f + ((young / mature) - 1f) * (1f - vitality)
 
     val matrix = ColorMatrix(
         floatArrayOf(
-            channelScale(palette.leaf.red, palette.witheredLeaf.red), 0f, 0f, 0f, 0f,
-            0f, channelScale(palette.leaf.green, palette.witheredLeaf.green), 0f, 0f, 0f,
-            0f, 0f, channelScale(palette.leaf.blue, palette.witheredLeaf.blue), 0f, 0f,
+            channelScale(palette.youngLeaf.red, palette.leaf.red), 0f, 0f, 0f, 0f,
+            0f, channelScale(palette.youngLeaf.green, palette.leaf.green), 0f, 0f, 0f,
+            0f, 0f, channelScale(palette.youngLeaf.blue, palette.leaf.blue), 0f, 0f,
             0f, 0f, 0f, 1f, 0f
         )
     )

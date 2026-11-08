@@ -135,12 +135,11 @@ val TextMuted: Color
 data class FlowerPalette(
     val stem: Color,
     val leaf: Color,
+    val youngLeaf: Color,
     val leafVein: Color,
     val pot: Color,
     val potRim: Color,
     val potShadow: Color,
-    val witheredStem: Color,
-    val witheredLeaf: Color,
     val seed: Color
 )
 
@@ -159,67 +158,61 @@ object FlowerPalettes {
     val Monstera = FlowerPalette(
         stem = Color(0xFF41694A),
         leaf = Color(0xFF4F7954),
+        youngLeaf = Color(0xFF8FCA6C),
         leafVein = Color(0xFFDCE8D9),
         pot = Color(0xFFBF8744),
         potRim = Color(0xFFE7BD72),
         potShadow = Color(0xFF6F4D35),
-        witheredStem = Color(0xFF88785B),
-        witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
     val Fern = FlowerPalette(
         stem = Color(0xFF41694A),
         leaf = Color(0xFF688C5D),
+        youngLeaf = Color(0xFF9DCF74),
         leafVein = Color(0xFFDCE8D9),
         potShadow = Color(0xFF6F4D35),
         pot = Color(0xFF587969),
         potRim = Color(0xFF8AAA98),
-        witheredStem = Color(0xFF88785B),
-        witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
     val Succulent = FlowerPalette(
         stem = Color(0xFF718261),
         leaf = Color(0xFF7C9069),
+        youngLeaf = Color(0xFFB0CF7A),
         leafVein = Color(0xFFDCE8D9),
         pot = Color(0xFFB8734F),
         potRim = Color(0xFFD89162),
         potShadow = Color(0xFF6F4D35),
-        witheredStem = Color(0xFF88785B),
-        witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
     val ChineseMoneyPlant = FlowerPalette(
         stem = Color(0xFF41694A),
         leaf = Color(0xFF5D956A),
+        youngLeaf = Color(0xFF9FD477),
         leafVein = Color(0xFFBFD5A8),
         pot = Color(0xFFB8734F),
         potRim = Color(0xFFD89162),
         potShadow = Color(0xFF6F4D35),
-        witheredStem = Color(0xFF88785B),
-        witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
     val OrchidPlant = FlowerPalette(
         stem = Color(0xFF527150),
         leaf = Color(0xFF668060),
+        youngLeaf = Color(0xFFA4CD7C),
         leafVein = Color(0xFFDCE8D9),
         pot = Color(0xFFB8734F),
         potRim = Color(0xFFD89162),
         potShadow = Color(0xFF6F4D35),
-        witheredStem = Color(0xFF88785B),
-        witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
     val Cactus = FlowerPalette(
         stem = Color(0xFF396E51),
         leaf = Color(0xFF5D956A),
+        youngLeaf = Color(0xFF8FCB70),
         leafVein = Color(0xFFDCE8D9),
         pot = Color(0xFFB8734F),
         potRim = Color(0xFFD89162),
         potShadow = Color(0xFF6F4D35),
-        witheredStem = Color(0xFF88785B),
-        witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
 
