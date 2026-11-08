@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
@@ -55,22 +57,6 @@ import com.example.plantyourhabit.ui.theme.Green700
 import com.example.plantyourhabit.ui.theme.Green800
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextSecondary
-
-data class Quest(
-    val id: Int,
-    val title: String,
-    val description: String,
-    val tags: List<String>,
-    val difficulty: String,
-    val reward: Int
-)
-
-val initialQuests = listOf(
-    Quest(1, "Book dentist appointment", "Find a nearby clinic and choose a time that works.", listOf("Life admin", "Health"), "Medium", 35),
-    Quest(2, "Organize the photo drawer", "Sort loose prints into keep, share, and archive piles.", listOf("Home"), "Medium", 25),
-    Quest(3, "Try a new soup recipe", "Pick something seasonal and make enough for tomorrow.", listOf("Someday", "Cooking"), "Easy", 20),
-    Quest(4, "Send the postcards", "Write a quick note and drop them in the mailbox.", listOf("Friends"), "Easy", 15)
-)
 
 @Composable
 fun QuestsScreen(
@@ -85,18 +71,13 @@ fun QuestsScreen(
     var questBeingEdited by remember { mutableStateOf<Quest?>(null) }
     var showCompletedQuests by remember { mutableStateOf(true) }
     var selectedTagFilters by remember { mutableStateOf(emptySet<String>()) }
-    val availableTags = quests
-        .flatMap(Quest::tags)
-        .distinctBy { it.trim().lowercase() }
-        .sortedBy { it.lowercase() }
-    val filteredQuests = (if (selectedTagFilters.isEmpty()) {
-        quests
-    } else {
-        quests.filter { quest ->
-            quest.tags.any { it.trim().lowercase() in selectedTagFilters }
-        }
-    }).filter { showCompletedQuests || it.id !in completedQuests }
-        .sortedBy { it.id in completedQuests }
+    val availableTags = availableQuestTags(quests)
+    val filteredQuests = filterQuests(
+        quests = quests,
+        completedQuestIds = completedQuests,
+        showCompleted = showCompletedQuests,
+        selectedTags = selectedTagFilters
+    )
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -188,6 +169,9 @@ fun QuestsScreen(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
+                        modifier = Modifier.semantics {
+                            contentDescription = "Show completed quests"
+                        },
                         checked = showCompletedQuests,
                         onCheckedChange = { showCompletedQuests = it }
                     )
@@ -380,6 +364,9 @@ private fun QuestCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
+                modifier = Modifier.semantics {
+                    contentDescription = "Complete ${quest.title}"
+                },
                 checked = done,
                 enabled = !done,
                 onCheckedChange = { if (!done) onComplete() }

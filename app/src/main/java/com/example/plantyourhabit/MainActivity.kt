@@ -316,18 +316,24 @@ fun PlantYourHabitApp(
                     ownedBackgrounds = ownedBackgrounds,
                     activeBackground = activeBackground,
                     onBuyPlant = { plant, price ->
-                        if (plant !in ownedPlants && gold >= price) {
-                            gold -= price
-                            ownedPlants.add(plant)
+                        purchasePlant(gold, ownedPlants, plant, price)?.let { purchase ->
+                            gold = purchase.gold
+                            ownedPlants.clear()
+                            ownedPlants.addAll(purchase.ownedPlants)
                         }
                     },
                     onSelectBackground = { id, price ->
-                        if (id in ownedBackgrounds) {
-                            activeBackground = id
-                        } else if (gold >= price) {
-                            gold -= price
-                            ownedBackgrounds.add(id)
-                            activeBackground = id
+                        selectGardenBackground(
+                            gold,
+                            ownedBackgrounds,
+                            activeBackground,
+                            id,
+                            price
+                        )?.let { selection ->
+                            gold = selection.gold
+                            ownedBackgrounds.clear()
+                            ownedBackgrounds.addAll(selection.ownedBackgrounds)
+                            activeBackground = selection.activeBackground
                         }
                     },
                     modifier = Modifier.weight(1f)
