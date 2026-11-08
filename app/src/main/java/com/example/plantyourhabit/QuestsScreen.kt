@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.example.plantyourhabit.ui.theme.BeigeBackground
 import com.example.plantyourhabit.ui.theme.CreamBackground
 import com.example.plantyourhabit.ui.theme.CreamSurface
@@ -167,6 +169,9 @@ fun QuestsScreen(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
+                        modifier = Modifier.semantics {
+                            contentDescription = "Show completed quests"
+                        },
                         checked = showCompletedQuests,
                         onCheckedChange = { showCompletedQuests = it }
                     )
@@ -359,6 +364,9 @@ private fun QuestCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
+                modifier = Modifier.semantics {
+                    contentDescription = "Complete ${quest.title}"
+                },
                 checked = done,
                 enabled = !done,
                 onCheckedChange = { if (!done) onComplete() }
