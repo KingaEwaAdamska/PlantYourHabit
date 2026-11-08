@@ -56,7 +56,7 @@ private val DarkShopIconSurface = Color(0xFF747876)
 private enum class ShopArt(val drawable: Int) {
     MONEY_PLANT(R.drawable.ic_shop_money_plant),
     CACTUS(R.drawable.ic_shop_cactus),
-    LAVENDER(R.drawable.ic_shop_lavender),
+    ORCHID(R.drawable.ic_shop_orchid),
     LEAF(R.drawable.ic_shop_leaf),
     SUN(R.drawable.ic_shop_sun),
     MOON(R.drawable.ic_shop_moon),
@@ -73,7 +73,7 @@ private fun ShopArtwork(art: ShopArt, modifier: Modifier = Modifier) {
 private val plantProducts = listOf(
     ShopProduct(1, "Chinese money plant", 70, ShopArt.MONEY_PLANT),
     ShopProduct(2, "Desert cactus", 85, ShopArt.CACTUS),
-    ShopProduct(3, "Soft lavender", 105, ShopArt.LAVENDER)
+    ShopProduct(3, "Orchid", 105, ShopArt.ORCHID)
 )
 
 private val gardenThemes = listOf(
@@ -139,7 +139,7 @@ fun ShopScreen(
                 val id = when (product.id) {
                     1 -> "chinese_money_plant"
                     2 -> "cactus"
-                    else -> "lavender"
+                    else -> "orchid"
                 }
                 val owned = id in ownedPlants
                 ShopListRow(

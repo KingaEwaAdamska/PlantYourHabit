@@ -103,27 +103,16 @@ internal fun PlantArtwork(
             modifier = plantModifier
         )
 
-        if (animatedStage > 0f) {
-            plantHeadDrawable(type)?.let { headResource ->
-                Image(
-                    painter = painterResource(headResource),
-                    contentDescription = null,
-                    contentScale = ContentScale.FillBounds,
-                    modifier = plantModifier
-                )
-            }
-        }
-
         val bloomStart = MAX_STREAK_DAY * FLOWER_BLOOM_START_FRACTION
-        if (type != "chinese_money_plant" && type != "succulent" && type != "lavender" && type != "monstera" && type != "fern" && animatedStage >= bloomStart) {
+        if (type != "chinese_money_plant" && type != "succulent" && type != "monstera" && type != "fern" && animatedStage >= bloomStart) {
             val bloomAlpha = ((animatedStage - bloomStart) /
                 (MAX_STREAK_DAY * (1f - FLOWER_BLOOM_START_FRACTION))).coerceIn(0f, 1f)
             Image(
                 painter = painterResource(
-                    if (type == "cactus") {
-                        R.drawable.ic_plant_cactus_bloom
-                    } else {
-                        R.drawable.ic_plant_mature_bloom
+                    when (type) {
+                        "cactus" -> R.drawable.ic_plant_cactus_bloom
+                        "orchid" -> R.drawable.ic_plant_orchid_head
+                        else -> R.drawable.ic_plant_mature_bloom
                     }
                 ),
                 contentDescription = null,
@@ -151,7 +140,7 @@ private fun PlantPot(type: String) {
 private fun plantDrawable(type: String): Int = when (type) {
     "cactus" -> R.drawable.ic_plant_cactus
     "chinese_money_plant" -> R.drawable.ic_plant_chinese_money_plant
-    "lavender" -> R.drawable.ic_plant_lavender
+    "orchid" -> R.drawable.ic_plant_orchid
     "monstera" -> R.drawable.ic_plant_monstera
     "succulent" -> R.drawable.ic_plant_succulent
     "fern" -> R.drawable.ic_plant_fern
@@ -162,11 +151,6 @@ private fun potDrawable(type: String): Int = when (type) {
     "monstera" -> R.drawable.ic_plant_pot_monstera
     "fern" -> R.drawable.ic_plant_pot_fern
     else -> R.drawable.ic_plant_pot_terracotta
-}
-
-private fun plantHeadDrawable(type: String): Int? = when (type) {
-    "lavender" -> R.drawable.ic_plant_lavender_head
-    else -> null
 }
 
 private fun vitalityColorFilter(type: String, vitality: Float): ColorFilter {

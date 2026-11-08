@@ -44,7 +44,7 @@ val DividerColor = Color(0xFFE7E5DD)
 
 // Flowers — dodatkowe akcenty
 val FlowerPink = Color(0xFFD88975)
-val Lavender = Color(0xFF9A81AE)
+val Orchid = Color(0xFF9A81AE)
 val LeafGreen = Color(0xFF7C9069)
 val EveningGardenBackdrop = Color(0xFFD4C5D0)
 val EveningGardenSunset = Color(0xFFE6A16F)
@@ -149,9 +149,9 @@ data class CactusPalette(
     val highlight: Color
 )
 
-data class LavenderPalette(
-    val lavenderLight: Color,
-    val lavenderDark: Color
+data class OrchidPalette(
+    val orchidLight: Color,
+    val orchidDark: Color
 )
 
 object FlowerPalettes {
@@ -199,7 +199,7 @@ object FlowerPalettes {
         witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
-    val LavenderPlant = FlowerPalette(
+    val OrchidPlant = FlowerPalette(
         stem = Color(0xFF527150),
         leaf = Color(0xFF668060),
         leafVein = Color(0xFFDCE8D9),
@@ -227,16 +227,16 @@ object FlowerPalettes {
         outline = Color(0xFF396E51),
         highlight = Color(0xFF68A073)
     )
-    val LavenderDetails = LavenderPalette(
-        lavenderLight = Color(0xFFA189B3),
-        lavenderDark = Color(0xFF8F78A4)
+    val OrchidDetails = OrchidPalette(
+        orchidLight = Color(0xFFB78CCB),
+        orchidDark = Color(0xFF8F5DA8)
     )
 
     fun forPlant(type: String): FlowerPalette = when (type) {
         "fern" -> Fern
         "succulent" -> Succulent
         "chinese_money_plant" -> ChineseMoneyPlant
-        "lavender" -> LavenderPlant
+        "orchid" -> OrchidPlant
         "cactus" -> Cactus
         else -> Monstera
     }

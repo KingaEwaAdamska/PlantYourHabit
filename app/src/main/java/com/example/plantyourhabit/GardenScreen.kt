@@ -669,7 +669,7 @@ private fun String.displayName(): String = when (this) {
     "succulent" -> "Succulent"
     "chinese_money_plant" -> "Chinese money plant"
     "cactus" -> "Desert cactus"
-    "lavender" -> "Soft lavender"
+    "orchid" -> "Orchid"
     else -> replaceFirstChar { it.uppercase() }
 }
 
