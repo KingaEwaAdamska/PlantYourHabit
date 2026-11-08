@@ -21,9 +21,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
@@ -41,11 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.lerp
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -66,7 +58,6 @@ import com.example.plantyourhabit.ui.theme.Green700
 import com.example.plantyourhabit.ui.theme.Green800
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextMuted
-import com.example.plantyourhabit.ui.theme.FlowerPalettes
 import com.example.plantyourhabit.ui.theme.EveningGardenBackdrop
 import com.example.plantyourhabit.ui.theme.EveningGardenSunset
 import com.example.plantyourhabit.ui.theme.ForestGardenBackdrop
@@ -251,7 +242,7 @@ fun GardenScreen(
               onCreate = { name ->
                   if (habits.size < MAX_HABITS) {
                       val nextId = (habits.maxOfOrNull(Habit::id) ?: 0) + 1
-                      onCreateHabit(Habit(nextId, name, "sprout", 6))
+                      onCreateHabit(Habit(nextId, name, "succulent", 6))
                   }
                   showAddHabitDialog = false
               }
@@ -295,7 +286,7 @@ fun GardenScreen(
                                   drawCircle(sparkleColor, radius = size.minDimension * .018f, center = sparkle)
                               }
                           }
-                          ShelfPlant(
+                          PlantArtwork(
                               type = habit.plant,
                               habit = habit,
                               today = today,
@@ -536,247 +527,6 @@ private fun ShelfHabitCard(
     }
 }
 
-@Composable
-private fun ShelfPlant(
-    type: String,
-    habit: Habit,
-    today: LocalDate,
-    modifier: Modifier = Modifier
-) {
-    val streak = habit.actualStreak(today)
-    val animatedStage by animateFloatAsState(
-        targetValue = streak.toFloat(),
-        animationSpec = tween(durationMillis = PLANT_GROWTH_ANIMATION_MILLIS),
-        label = "plantGrowth"
-    )
-    val growthGlow = remember(habit.id) { Animatable(0f) }
-    var wasDone by remember(habit.id) {
-        mutableStateOf(today.toString() in habit.careDays)
-    }
-    LaunchedEffect(today, habit.careDays) {
-        val isDone = today.toString() in habit.careDays
-        val justCompleted = isDone && !wasDone
-        wasDone = isDone
-        if (justCompleted) {
-            growthGlow.animateTo(1f, animationSpec = tween(durationMillis = 180))
-            growthGlow.animateTo(0f, animationSpec = tween(durationMillis = 650))
-        }
-    }
-    Canvas(modifier) {
-        val w = size.width
-        val h = size.height
-        val palette = FlowerPalettes.forPlant(type)
-        val vitality = (animatedStage / MAX_STREAK_DAY).coerceIn(0f, 1f)
-        val stem = lerp(palette.witheredStem, palette.stem, vitality)
-        val leaf = lerp(palette.witheredLeaf, palette.leaf, vitality)
-
-        fun drawLeaf(x: Float, y: Float, width: Float, height: Float, angle: Float, color: Color = leaf) {
-            rotate(angle, pivot = androidx.compose.ui.geometry.Offset(w * x, h * y)) {
-                drawOval(
-                    color = color,
-                    topLeft = androidx.compose.ui.geometry.Offset(w * (x - width / 2), h * (y - height / 2)),
-                    size = androidx.compose.ui.geometry.Size(w * width, h * height)
-                )
-                drawLine(
-                    color = palette.leafVein.copy(alpha = .65f),
-                    start = androidx.compose.ui.geometry.Offset(w * (x - width * .38f), h * y),
-                    end = androidx.compose.ui.geometry.Offset(w * (x + width * .38f), h * y),
-                    strokeWidth = GardenTokens.Hairline.toPx()
-                )
-            }
-        }
-
-        val plantScale = .68f + .32f * vitality
-        withTransform({
-            scale(plantScale, plantScale, pivot = androidx.compose.ui.geometry.Offset(w * .5f, h * .78f))
-        }) {
-        if (growthGlow.value > 0f) {
-            val glowCenter = androidx.compose.ui.geometry.Offset(w * .5f, h * .43f)
-            val glowRadius = minOf(w, h) * .58f
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colorStops = arrayOf(
-                        0f to Color(0xFFFFD54F).copy(alpha = .72f * growthGlow.value),
-                        .45f to Color(0xFFFFE89A).copy(alpha = .4f * growthGlow.value),
-                        1f to Color.Transparent
-                    ),
-                    center = glowCenter,
-                    radius = glowRadius
-                ),
-                radius = glowRadius,
-                center = glowCenter
-            )
-        }
-        if (animatedStage <= 0f) {
-            if (habit.hasCareHistory(today)) {
-                drawLine(
-                    palette.witheredStem,
-                    androidx.compose.ui.geometry.Offset(w * .5f, h * .78f),
-                    androidx.compose.ui.geometry.Offset(w * .46f, h * .61f),
-                    strokeWidth = w * .025f
-                )
-                drawOval(
-                    palette.witheredLeaf,
-                    androidx.compose.ui.geometry.Offset(w * .36f, h * .63f),
-                    androidx.compose.ui.geometry.Size(w * .14f, h * .06f)
-                )
-                drawOval(
-                    palette.witheredLeaf,
-                    androidx.compose.ui.geometry.Offset(w * .48f, h * .66f),
-                    androidx.compose.ui.geometry.Size(w * .14f, h * .06f)
-                )
-            } else {
-                drawOval(
-                    palette.seed,
-                    androidx.compose.ui.geometry.Offset(w * .45f, h * .70f),
-                    androidx.compose.ui.geometry.Size(w * .10f, h * .055f)
-                )
-            }
-        } else when (type) {
-            "cactus" -> {
-                val body = roundRectShapePath(w, h)
-                drawPath(body, FlowerPalettes.CactusDetails.body)
-                drawPath(body, FlowerPalettes.CactusDetails.outline, style = Stroke(width = GardenTokens.TinyInset.toPx()))
-                drawRoundRect(
-                    color = FlowerPalettes.CactusDetails.highlight,
-                    topLeft = androidx.compose.ui.geometry.Offset(w * .46f, h * .31f),
-                    size = androidx.compose.ui.geometry.Size(w * .07f, h * .39f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * .04f)
-                )
-                drawRoundRect(
-                    color = leaf,
-                    topLeft = androidx.compose.ui.geometry.Offset(w * .23f, h * .46f),
-                    size = androidx.compose.ui.geometry.Size(w * .16f, h * .24f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * .08f)
-                )
-                drawRoundRect(
-                    color = leaf,
-                    topLeft = androidx.compose.ui.geometry.Offset(w * .61f, h * .39f),
-                    size = androidx.compose.ui.geometry.Size(w * .16f, h * .24f),
-                    cornerRadius = androidx.compose.ui.geometry.CornerRadius(w * .08f)
-                )
-            }
-            "bloom" -> {
-                drawLine(stem, androidx.compose.ui.geometry.Offset(w * .5f, h * .79f), androidx.compose.ui.geometry.Offset(w * .5f, h * .28f), strokeWidth = w * .035f)
-                drawLeaf(.34f, .56f, .32f, .14f, 18f)
-                drawLeaf(.66f, .55f, .32f, .14f, -18f)
-                val petals = listOf(
-                    Triple(.5f, .23f, FlowerPalettes.BlossomDetails.blossomDark),
-                    Triple(.40f, .27f, FlowerPalettes.BlossomDetails.blossom),
-                    Triple(.60f, .27f, FlowerPalettes.BlossomDetails.blossomDark),
-                    Triple(.45f, .17f, FlowerPalettes.BlossomDetails.blossomLight),
-                    Triple(.55f, .17f, FlowerPalettes.BlossomDetails.blossom)
-                )
-                petals.forEach { (x, y, color) ->
-                    drawOval(
-                        color = color,
-                        topLeft = androidx.compose.ui.geometry.Offset(w * (x - .09f), h * (y - .07f)),
-                        size = androidx.compose.ui.geometry.Size(w * .18f, h * .14f)
-                    )
-                }
-                drawCircle(
-                    FlowerPalettes.BlossomDetails.center,
-                    radius = w * .045f,
-                    center = androidx.compose.ui.geometry.Offset(w * .5f, h * .23f)
-                )
-            }
-            "lavender" -> {
-                drawLine(stem, androidx.compose.ui.geometry.Offset(w * .5f, h * .79f), androidx.compose.ui.geometry.Offset(w * .5f, h * .20f), strokeWidth = w * .025f)
-                drawLeaf(.35f, .58f, .28f, .08f, 12f)
-                drawLeaf(.65f, .54f, .28f, .08f, -12f)
-                for (i in 0..5) {
-                    val y = .18f + i * .075f
-                    val xOffset = if (i % 2 == 0) -.035f else .035f
-                    drawCircle(
-                        color = (if (i % 2 == 0) {
-                            FlowerPalettes.LavenderDetails.lavenderDark
-                        } else {
-                            FlowerPalettes.LavenderDetails.lavenderLight
-                        })
-                            .copy(alpha = .3f + .7f * vitality),
-                        radius = w * .065f,
-                        center = androidx.compose.ui.geometry.Offset(w * (.5f + xOffset), h * y)
-                    )
-                }
-            }
-            "sprout" -> {
-                drawLine(stem, androidx.compose.ui.geometry.Offset(w * .48f, h * .79f), androidx.compose.ui.geometry.Offset(w * .52f, h * .39f), strokeWidth = w * .035f)
-                drawLeaf(.36f, .42f, .33f, .16f, -4f)
-                drawLeaf(.63f, .33f, .33f, .16f, 3f)
-            }
-            "fern" -> {
-                drawLine(stem, androidx.compose.ui.geometry.Offset(w * .5f, h * .79f), androidx.compose.ui.geometry.Offset(w * .5f, h * .24f), strokeWidth = w * .03f)
-                listOf(
-                    Triple(.32f, .58f, 14f), Triple(.68f, .52f, -14f),
-                    Triple(.34f, .45f, 14f), Triple(.66f, .39f, -14f),
-                    Triple(.39f, .32f, 14f), Triple(.61f, .27f, -14f)
-                ).forEach { (x, y, angle) -> drawLeaf(x, y, .4f, .11f, angle) }
-            }
-            else -> {
-                drawLine(stem, androidx.compose.ui.geometry.Offset(w * .5f, h * .79f), androidx.compose.ui.geometry.Offset(w * .5f, h * .24f), strokeWidth = w * .035f)
-                drawLeaf(.31f, .59f, .40f, .20f, 18f)
-                drawLeaf(.69f, .50f, .42f, .21f, -13f)
-                drawLeaf(.36f, .36f, .34f, .18f, 27f)
-                drawLeaf(.64f, .27f, .34f, .18f, -20f)
-            }
-        }
-        val bloomStart = MAX_STREAK_DAY * FLOWER_BLOOM_START_FRACTION
-        if (type != "bloom" && type != "lavender" && animatedStage >= bloomStart) {
-            val bloomAlpha = ((animatedStage - bloomStart) /
-                (MAX_STREAK_DAY * (1f - FLOWER_BLOOM_START_FRACTION))).coerceIn(0f, 1f)
-            val center = androidx.compose.ui.geometry.Offset(w * .5f, h * .2f)
-            listOf(
-                androidx.compose.ui.geometry.Offset(0f, -1f),
-                androidx.compose.ui.geometry.Offset(-.9f, -.3f),
-                androidx.compose.ui.geometry.Offset(-.55f, .8f),
-                androidx.compose.ui.geometry.Offset(.55f, .8f),
-                androidx.compose.ui.geometry.Offset(.9f, -.3f)
-            ).forEach { petal ->
-                drawCircle(
-                    color = FlowerPalettes.BlossomDetails.blossom.copy(alpha = bloomAlpha),
-                    radius = w * .055f,
-                    center = center + androidx.compose.ui.geometry.Offset(
-                        petal.x * w * .07f,
-                        petal.y * h * .045f
-                    )
-                )
-            }
-            drawCircle(
-                color = FlowerPalettes.BlossomDetails.center.copy(alpha = bloomAlpha),
-                radius = w * .025f,
-                center = center
-            )
-        }
-        }
-
-        drawOval(
-            color = palette.potShadow,
-            topLeft = androidx.compose.ui.geometry.Offset(w * .28f, h * .76f),
-            size = androidx.compose.ui.geometry.Size(w * .44f, h * .08f)
-        )
-        val pot = Path().apply {
-            moveTo(w * .31f, h * .78f)
-            lineTo(w * .69f, h * .78f)
-            lineTo(w * .64f, h)
-            lineTo(w * .36f, h)
-            close()
-        }
-        drawPath(pot, palette.pot)
-        drawRect(palette.potRim, androidx.compose.ui.geometry.Offset(w * .3f, h * .76f), androidx.compose.ui.geometry.Size(w * .4f, h * .045f))
-    }
-}
-
-private fun roundRectShapePath(width: Float, height: Float) = Path().apply {
-    addRoundRect(
-        androidx.compose.ui.geometry.RoundRect(
-            left = width * .37f,
-            top = height * .28f,
-            right = width * .63f,
-            bottom = height * .78f,
-            cornerRadius = androidx.compose.ui.geometry.CornerRadius(width * .13f)
-        )
-    )
-}
 
 @Composable
 private fun ShelfPost(modifier: Modifier = Modifier) {
@@ -822,7 +572,7 @@ private fun GardenPlant(
     onEdit: () -> Unit = {}
 ) {
     Box(modifier, contentAlignment = Alignment.BottomCenter) {
-        ShelfPlant(
+        PlantArtwork(
             type,
             habit,
             today,
@@ -881,7 +631,7 @@ private fun PlantPickerDialog(
                             .padding(horizontal = GardenTokens.ContentInset, vertical = GardenTokens.LabelInset),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        ShelfPlant(
+                        PlantArtwork(
                             plant,
                             habit = habit.copy(careDays = exampleCareDays(MAX_STREAK_DAY)),
                             today = LocalDate.now(),
@@ -916,8 +666,8 @@ private fun PlantPickerDialog(
 private fun String.displayName(): String = when (this) {
     "monstera" -> "Monstera"
     "fern" -> "Fern"
-    "sprout" -> "Sprout"
-    "bloom" -> "Coral blossom"
+    "succulent" -> "Succulent"
+    "chinese_money_plant" -> "Chinese money plant"
     "cactus" -> "Desert cactus"
     "lavender" -> "Soft lavender"
     else -> replaceFirstChar { it.uppercase() }

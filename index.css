@@ -617,50 +617,33 @@ button {
 .plant-fern .leaf-3 { top: 30px; left: 17px; }
 .plant-fern .leaf-4 { top: 19px; right: 16px; }
 
-.plant-sprout .stem {
-  height: 52px;
+.plant-succulent .stem {
+  height: 44px;
   transform: rotate(8deg);
   background: #718261;
 }
-.plant-sprout .leaf { background: #7c9069; filter: saturate(0.7); }
-.plant-sprout .leaf-1 { top: 59px; transform: rotate(-4deg) scale(0.75); }
-.plant-sprout .leaf-2 { top: 45px; transform: rotate(3deg) scale(0.78); }
-.plant-sprout .leaf-3,
-.plant-sprout .leaf-4 { display: none; }
+.plant-succulent .leaf { background: #7c9069; filter: saturate(0.7); }
+.plant-succulent .leaf-1 { top: 62px; transform: rotate(-4deg) scale(0.7); }
+.plant-succulent .leaf-2 { top: 52px; transform: rotate(3deg) scale(0.72); }
+.plant-succulent .leaf-3,
+.plant-succulent .leaf-4 { display: none; }
 
-.plant-bloom .stem {
-  height: 72px;
-  background: #4e774f;
+.plant-chinese_money_plant .stem {
+  height: 46px;
+  top: 31px;
+  background: #41694a;
 }
-.plant-bloom .leaf-1,
-.plant-bloom .leaf-2 {
-  width: 35px;
-  height: 20px;
-  top: 55px;
-}
-.plant-bloom .leaf-3,
-.plant-bloom .leaf-4 {
-  width: 24px;
-  height: 24px;
-  top: 12px;
-  border: 0;
-  border-radius: 50% 50% 45% 45%;
-  background: #d88975;
-}
-.plant-bloom .leaf-3 { left: 30px; transform: rotate(-35deg); }
-.plant-bloom .leaf-4 { right: 29px; transform: rotate(35deg); }
-.plant-bloom::after {
-  content: "";
-  width: 23px;
-  height: 23px;
-  position: absolute;
-  left: 38px;
-  top: 11px;
-  z-index: 4;
-  border: 7px solid #dd8976;
+.plant-chinese_money_plant .leaf {
+  width: 27px;
+  height: 27px;
+  border: 1px solid #41694a;
   border-radius: 50%;
-  background: #e8b657;
+  background: #5d956a;
 }
+.plant-chinese_money_plant .leaf-1 { top: 29px; left: 15px; }
+.plant-chinese_money_plant .leaf-2 { top: 26px; right: 13px; }
+.plant-chinese_money_plant .leaf-3 { top: 8px; left: 36px; }
+.plant-chinese_money_plant .leaf-4 { top: 47px; right: 19px; }
 
 .plant-cactus .stem {
   width: 27px;

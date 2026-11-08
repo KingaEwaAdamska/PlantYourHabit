@@ -168,7 +168,7 @@ fun PlantYourHabitApp(
 
     val ownedPlants = remember { mutableStateListOf<String>() }
     val selectedPlants = remember {
-        mutableStateMapOf(1 to "monstera", 2 to "fern", 3 to "sprout")
+        mutableStateMapOf(1 to "monstera", 2 to "fern", 3 to "succulent")
     }
     val ownedBackgrounds = remember {
         mutableStateListOf("classic")
@@ -209,7 +209,7 @@ fun PlantYourHabitApp(
                     activeBackground = activeBackground,
                     selectedPlants = selectedPlants,
                     habitSlots = habitSlots,
-                    availablePlants = listOf("monstera", "fern", "sprout") + ownedPlants,
+                    availablePlants = listOf("monstera", "fern", "succulent") + ownedPlants,
                     onSelectPlant = { habitId, plant ->
                         selectedPlants[habitId] = plant
                     },

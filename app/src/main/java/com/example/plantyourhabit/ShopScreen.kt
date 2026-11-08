@@ -54,7 +54,7 @@ private val DarkShopCardOwned = Color(0xFF454B48)
 private val DarkShopIconSurface = Color(0xFF747876)
 
 private enum class ShopArt(val drawable: Int) {
-    BLOSSOM(R.drawable.ic_shop_blossom),
+    MONEY_PLANT(R.drawable.ic_shop_money_plant),
     CACTUS(R.drawable.ic_shop_cactus),
     LAVENDER(R.drawable.ic_shop_lavender),
     LEAF(R.drawable.ic_shop_leaf),
@@ -71,7 +71,7 @@ private fun ShopArtwork(art: ShopArt, modifier: Modifier = Modifier) {
 }
 
 private val plantProducts = listOf(
-    ShopProduct(1, "Coral blossom", 70, ShopArt.BLOSSOM),
+    ShopProduct(1, "Chinese money plant", 70, ShopArt.MONEY_PLANT),
     ShopProduct(2, "Desert cactus", 85, ShopArt.CACTUS),
     ShopProduct(3, "Soft lavender", 105, ShopArt.LAVENDER)
 )
@@ -137,16 +137,15 @@ fun ShopScreen(
         Column(verticalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
             plantProducts.forEach { product ->
                 val id = when (product.id) {
-                    1 -> "bloom"
+                    1 -> "chinese_money_plant"
                     2 -> "cactus"
                     else -> "lavender"
                 }
                 val owned = id in ownedPlants
                 ShopListRow(
                     art = product.art,
-                    eyebrow = if (owned) "IN YOUR COLLECTION" else "PLANT VARIETY",
+                    eyebrow = if (owned) "IN YOUR COLLECTION" else null,
                     name = product.name,
-                    detail = "Use this style for any habit",
                     price = product.price,
                     owned = owned,
                     canAfford = gold >= product.price,
@@ -194,9 +193,8 @@ fun ShopScreen(
 @Composable
 private fun ShopListRow(
     art: ShopArt,
-    eyebrow: String,
+    eyebrow: String?,
     name: String,
-    detail: String,
     price: Int,
     owned: Boolean,
     canAfford: Boolean,
@@ -228,9 +226,10 @@ private fun ShopListRow(
             }
             Spacer(Modifier.width(ShopTokens.ContentInset))
             Column(modifier = Modifier.weight(1f)) {
-                Text(eyebrow, color = Gold700, fontSize = ShopTokens.SmallLabelText, fontWeight = FontWeight.Bold)
+                eyebrow?.let {
+                    Text(it, color = Gold700, fontSize = ShopTokens.SmallLabelText, fontWeight = FontWeight.Bold)
+                }
                 Text(name, color = Green900, fontSize = ShopTokens.BodyText, fontWeight = FontWeight.Bold)
-                Text(detail, color = TextMuted, fontSize = ShopTokens.CaptionText)
             }
             Text(
                 if (owned) "Owned" else "Gold · $price",

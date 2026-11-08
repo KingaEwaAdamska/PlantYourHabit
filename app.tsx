@@ -95,7 +95,7 @@ function Icon({
 const habits = [
   { id: 1, name: "Morning water", detail: "7 day streak", plant: "monstera", reward: 6 },
   { id: 2, name: "Read 20 mins", detail: "4 day streak", plant: "fern", reward: 8 },
-  { id: 3, name: "Evening walk", detail: "Needs some care", plant: "sprout", reward: 10 },
+  { id: 3, name: "Evening walk", detail: "Needs some care", plant: "succulent", reward: 10 },
 ];
 
 const initialQuests: Quest[] = [
@@ -140,7 +140,7 @@ const difficultyRewards: Record<QuestDifficulty, number> = {
 };
 
 const plantShopItems = [
-  { type: "bloom", name: "Coral blossom", price: 70 },
+  { type: "chinese_money_plant", name: "Chinese money plant", price: 70 },
   { type: "cactus", name: "Desert cactus", price: 85 },
   { type: "lavender", name: "Soft lavender", price: 105 },
 ];
@@ -183,10 +183,10 @@ export default function App() {
   const [plantTypes, setPlantTypes] = useState<Record<number, string>>({
     1: "monstera",
     2: "fern",
-    3: "sprout",
+    3: "succulent",
   });
   const [editingPlant, setEditingPlant] = useState<number | null>(null);
-  const [ownedPlantTypes, setOwnedPlantTypes] = useState<string[]>(["monstera", "fern", "sprout"]);
+  const [ownedPlantTypes, setOwnedPlantTypes] = useState<string[]>(["monstera", "fern", "succulent"]);
   const [ownedBackgrounds, setOwnedBackgrounds] = useState<string[]>(["classic"]);
   const [activeBackground, setActiveBackground] = useState("classic");
 
@@ -589,8 +589,8 @@ export default function App() {
                 {[
                   { type: "monstera", label: "Monstera" },
                   { type: "fern", label: "Fern" },
-                  { type: "sprout", label: "Sprout" },
-                  { type: "bloom", label: "Blossom" },
+                  { type: "succulent", label: "Succulent" },
+                  { type: "chinese_money_plant", label: "Chinese money plant" },
                   { type: "cactus", label: "Cactus" },
                   { type: "lavender", label: "Lavender" },
                 ].filter((option) => ownedPlantTypes.includes(option.type)).map((option) => (

@@ -149,13 +149,6 @@ data class CactusPalette(
     val highlight: Color
 )
 
-data class BlossomPalette(
-    val blossomLight: Color,
-    val blossom: Color,
-    val blossomDark: Color,
-    val center: Color
-)
-
 data class LavenderPalette(
     val lavenderLight: Color,
     val lavenderDark: Color
@@ -184,7 +177,7 @@ object FlowerPalettes {
         witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
-    val Sprout = FlowerPalette(
+    val Succulent = FlowerPalette(
         stem = Color(0xFF718261),
         leaf = Color(0xFF7C9069),
         leafVein = Color(0xFFDCE8D9),
@@ -195,10 +188,10 @@ object FlowerPalettes {
         witheredLeaf = Color(0xFF9A8059),
         seed = Color(0xFF8C704B)
     )
-    val CoralBlossom = FlowerPalette(
-        stem = Color(0xFF4E774F),
-        leaf = Color(0xFF4F7954),
-        leafVein = Color(0xFFDCE8D9),
+    val ChineseMoneyPlant = FlowerPalette(
+        stem = Color(0xFF41694A),
+        leaf = Color(0xFF5D956A),
+        leafVein = Color(0xFFBFD5A8),
         pot = Color(0xFFB8734F),
         potRim = Color(0xFFD89162),
         potShadow = Color(0xFF6F4D35),
@@ -234,12 +227,6 @@ object FlowerPalettes {
         outline = Color(0xFF396E51),
         highlight = Color(0xFF68A073)
     )
-    val BlossomDetails = BlossomPalette(
-        blossomLight = Color(0xFFF0B29B),
-        blossom = Color(0xFFE4A08B),
-        blossomDark = Color(0xFFD88975),
-        center = Color(0xFFE8B657)
-    )
     val LavenderDetails = LavenderPalette(
         lavenderLight = Color(0xFFA189B3),
         lavenderDark = Color(0xFF8F78A4)
@@ -247,8 +234,8 @@ object FlowerPalettes {
 
     fun forPlant(type: String): FlowerPalette = when (type) {
         "fern" -> Fern
-        "sprout" -> Sprout
-        "bloom" -> CoralBlossom
+        "succulent" -> Succulent
+        "chinese_money_plant" -> ChineseMoneyPlant
         "lavender" -> LavenderPlant
         "cactus" -> Cactus
         else -> Monstera
