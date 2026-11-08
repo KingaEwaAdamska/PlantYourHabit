@@ -7,7 +7,7 @@ import java.time.temporal.ChronoUnit
 data class Habit(
     val id: Int,
     val name: String,
-    val plant: String,
+    val plant: PlantType,
     val reward: Int,
     val careDays: List<String> = emptyList()
 ) {
@@ -102,8 +102,6 @@ const val PLANT_GROWTH_ANIMATION_MILLIS = 500
 const val GARDEN_DATE_REFRESH_MILLIS = 60_000L
 
 const val PROGRESS_CIRCLE_DEGREES = 360f
-const val GARDEN_WINDOW_FRAME_OPACITY = 0.75f
-const val GARDEN_WINDOW_DECORATION_OPACITY = 0.55f
 
 fun exampleCareDays(streakDays: Int): List<String> {
     val count = streakDays.coerceIn(0, MAX_STREAK_DAY)
@@ -116,7 +114,7 @@ fun exampleCareDays(streakDays: Int): List<String> {
 }
 
 val initialHabits = listOf(
-    Habit(1, "Morning water", "monstera", 6, exampleCareDays(59)),
-    Habit(2, "No coffee", "monstera", 6, exampleCareDays(59)),
-    Habit(3, "Read 20 mins", "fern", 8, exampleCareDays(59))
+    Habit(1, "Morning water", PlantType.MONSTERA, 6, exampleCareDays(59)),
+    Habit(2, "No coffee", PlantType.MONSTERA, 6, exampleCareDays(59)),
+    Habit(3, "Read 20 mins", PlantType.FERN, 8, exampleCareDays(59))
 )

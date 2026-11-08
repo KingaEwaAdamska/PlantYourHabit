@@ -18,12 +18,7 @@ object GardenTokens {
     val GardenProgressRingSize = 40.dp
     val GardenShelfPostWidth = 15.dp
     val GardenTitleText = 18.sp
-    val GardenWindowArchRadius = 70.dp
     val GardenWindowHeight = 112.dp
-    val GardenWindowInnerArchRadius = 68.dp
-    val GardenWindowSunSize = 24.dp
-    val WindowSunTopInset = 18.dp
-    val WindowSunEndInset = 16.dp
     val GardenWindowWidth = 140.dp
     val HabitCardCornerRadius = 17.dp
     val HabitCompletionControlSize = 27.dp
