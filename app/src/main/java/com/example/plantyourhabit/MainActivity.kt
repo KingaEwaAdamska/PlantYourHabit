@@ -181,12 +181,12 @@ fun PlantYourHabitApp(
             3 to PlantType.SUCCULENT
         )
     }
-    val ownedBackgrounds = remember {
-        mutableStateListOf<String>().apply { addAll(savedAppState.ownedBackgrounds) }
+    val ownedThemes = remember {
+        mutableStateListOf<GardenTheme>().apply { addAll(savedAppState.ownedThemes) }
     }
 
-    var activeBackground by remember {
-        mutableStateOf(savedAppState.activeBackground)
+    var activeTheme by remember {
+        mutableStateOf(savedAppState.activeTheme)
     }
 
     val stateToPersist = PersistedAppState(
@@ -194,8 +194,8 @@ fun PlantYourHabitApp(
         quests = quests.toList(),
         completedQuestIds = completedQuests,
         ownedPlants = ownedPlants.toList(),
-        ownedBackgrounds = ownedBackgrounds.toList(),
-        activeBackground = activeBackground
+        ownedThemes = ownedThemes.toList(),
+        activeTheme = activeTheme
     )
     LaunchedEffect(stateToPersist) {
         appStateStore.save(stateToPersist)
@@ -229,7 +229,7 @@ fun PlantYourHabitApp(
                 when (currentDestination) {
                     AppDestinations.GARDEN -> GardenScreen(
                     habits = habits,
-                    activeBackground = activeBackground,
+                    activeBackground = activeTheme,
                     selectedPlants = selectedPlants,
                     habitSlots = habitSlots,
                     availablePlants = listOf(PlantType.MONSTERA, PlantType.FERN, PlantType.SUCCULENT) + ownedPlants,
@@ -313,8 +313,8 @@ fun PlantYourHabitApp(
                     AppDestinations.SHOP -> ShopScreen(
                     gold = gold,
                     ownedPlants = ownedPlants,
-                    ownedBackgrounds = ownedBackgrounds,
-                    activeBackground = activeBackground,
+                    ownedThemes = ownedThemes,
+                    activeTheme = activeTheme,
                     onBuyPlant = { plant, price ->
                         purchasePlant(gold, ownedPlants, plant, price)?.let { purchase ->
                             gold = purchase.gold
@@ -322,18 +322,16 @@ fun PlantYourHabitApp(
                             ownedPlants.addAll(purchase.ownedPlants)
                         }
                     },
-                    onSelectBackground = { id, price ->
-                        selectGardenBackground(
+                    onSelectTheme = { theme ->
+                        selectGardenTheme(
                             gold,
-                            ownedBackgrounds,
-                            activeBackground,
-                            id,
-                            price
+                            ownedThemes,
+                            theme
                         )?.let { selection ->
                             gold = selection.gold
-                            ownedBackgrounds.clear()
-                            ownedBackgrounds.addAll(selection.ownedBackgrounds)
-                            activeBackground = selection.activeBackground
+                            ownedThemes.clear()
+                            ownedThemes.addAll(selection.ownedThemes)
+                            activeTheme = selection.activeTheme
                         }
                     },
                     modifier = Modifier.weight(1f)

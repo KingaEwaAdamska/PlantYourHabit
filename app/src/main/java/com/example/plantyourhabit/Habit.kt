@@ -35,17 +35,16 @@ data class Habit(
         return consecutiveDays.coerceAtMost(MAX_STREAK_DAY)
     }
 
-    fun growthLabel(today: LocalDate = LocalDate.now()): String {
-        return when {
-            !hasCareHistory(today) -> "SEED"
+    fun growthStage(today: LocalDate = LocalDate.now()): GrowthStage {
+        if (!hasCareHistory(today)) return GrowthStage.SEED
 
-            actualStreak(today) >= MAX_STREAK_DAY -> "FULL BLOOM"
-            actualStreak(today) >= BLOOMING_STAGE_START_DAY -> "BLOOMING"
-            actualStreak(today) >= BUDDING_STAGE_START_DAY -> "BUDDING"
-            actualStreak(today) >= GROWING_STAGE_START_DAY -> "GROWING"
-            actualStreak(today) > 0 -> "SEEDLING"
-
-            else -> "WITHERING"
+        return when (val streak = actualStreak(today)) {
+            in MAX_STREAK_DAY..Int.MAX_VALUE -> GrowthStage.FULL_BLOOM
+            in BLOOMING_STAGE_START_DAY until MAX_STREAK_DAY -> GrowthStage.BLOOMING
+            in BUDDING_STAGE_START_DAY until BLOOMING_STAGE_START_DAY -> GrowthStage.BUDDING
+            in GROWING_STAGE_START_DAY until BUDDING_STAGE_START_DAY -> GrowthStage.GROWING
+            in 1 until GROWING_STAGE_START_DAY -> GrowthStage.SEEDLING
+            else -> GrowthStage.WITHERING
         }
     }
 
@@ -84,6 +83,16 @@ data class Habit(
         copy(
             careDays = careDays.filterNot { it == today.toString() }
         )
+}
+
+enum class GrowthStage(val displayLabel: String) {
+    SEED("Seed"),
+    SEEDLING("Seedling"),
+    GROWING("Growing"),
+    BUDDING("Budding"),
+    BLOOMING("Blooming"),
+    FULL_BLOOM("Full bloom"),
+    WITHERING("Withering")
 }
 
 const val MAX_HABITS = 3

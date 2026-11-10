@@ -36,7 +36,7 @@ class HabitTest {
         val habit = Habit(1, "Water plants", PlantType.FERN, 5, listOf(today.minusDays(2).toString()))
 
         assertEquals(0, habit.actualStreak(today))
-        assertEquals("WITHERING", habit.growthLabel(today))
+        assertEquals(GrowthStage.WITHERING, habit.growthStage(today))
     }
 
     @Test
@@ -70,7 +70,7 @@ class HabitTest {
 
         assertFalse(habit.hasCareHistory(today))
         assertEquals(0, habit.actualStreak(today))
-        assertEquals("SEED", habit.growthLabel(today))
+        assertEquals(GrowthStage.SEED, habit.growthStage(today))
     }
 
     @Test
@@ -151,19 +151,19 @@ class HabitTest {
     fun growthLabelsFollowStreakStageThresholds() {
         val today = LocalDate.of(2026, 10, 27)
         val cases = listOf(
-            1 to "SEEDLING",
-            GROWING_STAGE_START_DAY - 1 to "SEEDLING",
-            GROWING_STAGE_START_DAY to "GROWING",
-            BUDDING_STAGE_START_DAY - 1 to "GROWING",
-            BUDDING_STAGE_START_DAY to "BUDDING",
-            BLOOMING_STAGE_START_DAY - 1 to "BUDDING",
-            BLOOMING_STAGE_START_DAY to "BLOOMING",
-            MAX_STREAK_DAY - 1 to "BLOOMING",
-            MAX_STREAK_DAY to "FULL BLOOM"
+            1 to GrowthStage.SEEDLING,
+            GROWING_STAGE_START_DAY - 1 to GrowthStage.SEEDLING,
+            GROWING_STAGE_START_DAY to GrowthStage.GROWING,
+            BUDDING_STAGE_START_DAY - 1 to GrowthStage.GROWING,
+            BUDDING_STAGE_START_DAY to GrowthStage.BUDDING,
+            BLOOMING_STAGE_START_DAY - 1 to GrowthStage.BUDDING,
+            BLOOMING_STAGE_START_DAY to GrowthStage.BLOOMING,
+            MAX_STREAK_DAY - 1 to GrowthStage.BLOOMING,
+            MAX_STREAK_DAY to GrowthStage.FULL_BLOOM
         )
 
-        cases.forEach { (streak, expectedLabel) ->
-            assertEquals(expectedLabel, habitWithStreak(streak, today).growthLabel(today))
+        cases.forEach { (streak, expectedStage) ->
+            assertEquals(expectedStage, habitWithStreak(streak, today).growthStage(today))
         }
     }
 

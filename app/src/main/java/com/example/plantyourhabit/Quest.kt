@@ -1,5 +1,7 @@
 package com.example.plantyourhabit
 
+import java.util.Locale
+
 data class Quest(
     val id: Int,
     val title: String,
@@ -16,11 +18,19 @@ val initialQuests = listOf(
     Quest(4, "Send the postcards", "Write a quick note and drop them in the mailbox.", listOf("Friends"), "Easy", 15)
 )
 
+internal fun normalizeQuestTag(tag: String): String = tag.trim().lowercase(Locale.ROOT)
+
+fun normalizeQuestTags(tags: List<String>): List<String> =
+    tags
+        .map(String::trim)
+        .filter(String::isNotEmpty)
+        .distinctBy(::normalizeQuestTag)
+
 fun availableQuestTags(quests: List<Quest>): List<String> =
     quests
         .flatMap(Quest::tags)
-        .distinctBy { it.trim().lowercase() }
-        .sortedBy { it.lowercase() }
+        .let(::normalizeQuestTags)
+        .sortedBy(::normalizeQuestTag)
 
 fun filterQuests(
     quests: List<Quest>,
@@ -28,12 +38,12 @@ fun filterQuests(
     showCompleted: Boolean,
     selectedTags: Set<String>
 ): List<Quest> {
-    val normalizedTags = selectedTags.map { it.trim().lowercase() }.toSet()
+    val normalizedTags = selectedTags.map(::normalizeQuestTag).toSet()
     return (if (normalizedTags.isEmpty()) {
         quests
     } else {
         quests.filter { quest ->
-            quest.tags.any { it.trim().lowercase() in normalizedTags }
+            quest.tags.any { normalizeQuestTag(it) in normalizedTags }
         }
     })
         .filter { showCompleted || it.id !in completedQuestIds }

@@ -51,7 +51,7 @@ import com.example.plantyourhabit.ui.theme.TextMuted
 @Composable
 internal fun GardenRoom(
     habits: List<Habit>,
-    activeBackground: String,
+    activeBackground: GardenTheme,
     selectedPlants: Map<Int, PlantType>,
     habitSlots: Map<Int, Int>,
     today: LocalDate,
@@ -60,10 +60,10 @@ internal fun GardenRoom(
     modifier: Modifier = Modifier
 ) {
     val backdropBrush = when (activeBackground) {
-        "sunroom" -> Brush.verticalGradient(listOf(SunroomGardenBackdrop, SunroomGardenBackdrop))
-        "evening" -> Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
-        "forest" -> Brush.verticalGradient(listOf(ForestGardenBackdrop, ForestGardenBackdrop))
-        else -> Brush.verticalGradient(listOf(Green300, Green300))
+        GardenTheme.CLASSIC -> Brush.verticalGradient(listOf(Green300, Green300))
+        GardenTheme.SUNROOM -> Brush.verticalGradient(listOf(SunroomGardenBackdrop, SunroomGardenBackdrop))
+        GardenTheme.EVENING -> Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
+        GardenTheme.FOREST -> Brush.verticalGradient(listOf(ForestGardenBackdrop, ForestGardenBackdrop))
     }
 
     BoxWithConstraints(modifier.background(backdropBrush)) {
@@ -89,7 +89,7 @@ internal fun GardenRoom(
 @Composable
 private fun GardenShelf(
     backdrop: Brush,
-    activeBackground: String,
+    activeBackground: GardenTheme,
     modifier: Modifier = Modifier
 ) {
     BoxWithConstraints(modifier.background(backdrop)) {
@@ -233,7 +233,7 @@ private fun ShelfHabitCard(
                         "streak=${habit.actualStreak(today)}"
                 )
                 Text(
-                    "${if (done) "CARED TODAY · " else ""}${habit.growthLabel(today)} · ${habit.actualStreak(today)}/$MAX_STREAK_DAY",
+                    "${if (done) "CARED TODAY · " else ""}${habit.growthStage(today).displayLabel.uppercase()} · ${habit.actualStreak(today)}/$MAX_STREAK_DAY",
                     color = TextMuted,
                     fontSize = GardenTokens.TinyLabelText,
                     fontWeight = FontWeight.Bold,
@@ -354,17 +354,11 @@ private fun GardenPlant(
 
 @Composable
 private fun GardenWindow(
-    activeBackground: String,
+    activeBackground: GardenTheme,
     modifier: Modifier = Modifier
 ) {
-    val windowImage = when (activeBackground) {
-        "sunroom" -> R.drawable.window_sunroom
-        "evening" -> R.drawable.window_evening
-        "forest" -> R.drawable.window_forest
-        else -> R.drawable.window_classic
-    }
     Image(
-        painter = painterResource(windowImage),
+        painter = painterResource(activeBackground.windowArtwork),
         contentDescription = null,
         modifier = modifier.size(
             width = GardenTokens.GardenWindowWidth,

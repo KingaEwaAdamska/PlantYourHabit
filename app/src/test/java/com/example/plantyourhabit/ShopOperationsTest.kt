@@ -25,44 +25,38 @@ class ShopOperationsTest {
     }
 
     @Test
-    fun selectingOwnedBackgroundDoesNotCostGold() {
-        val selection = selectGardenBackground(
+    fun selectingOwnedThemeDoesNotCostGold() {
+        val selection = selectGardenTheme(
             gold = 20,
-            ownedBackgrounds = listOf("classic", "evening"),
-            activeBackground = "classic",
-            backgroundId = "evening",
-            price = 120
+            ownedThemes = listOf(GardenTheme.CLASSIC, GardenTheme.EVENING),
+            theme = GardenTheme.EVENING
         )
 
         assertEquals(20, selection?.gold)
-        assertEquals("evening", selection?.activeBackground)
-        assertEquals(listOf("classic", "evening"), selection?.ownedBackgrounds)
+        assertEquals(GardenTheme.EVENING, selection?.activeTheme)
+        assertEquals(listOf(GardenTheme.CLASSIC, GardenTheme.EVENING), selection?.ownedThemes)
     }
 
     @Test
-    fun purchasingBackgroundDeductsGoldAndActivatesIt() {
-        val selection = selectGardenBackground(
+    fun purchasingThemeDeductsGoldAndActivatesIt() {
+        val selection = selectGardenTheme(
             gold = 150,
-            ownedBackgrounds = listOf("classic"),
-            activeBackground = "classic",
-            backgroundId = "forest",
-            price = 150
+            ownedThemes = listOf(GardenTheme.CLASSIC),
+            theme = GardenTheme.FOREST
         )
 
         assertEquals(0, selection?.gold)
-        assertEquals(listOf("classic", "forest"), selection?.ownedBackgrounds)
-        assertEquals("forest", selection?.activeBackground)
+        assertEquals(listOf(GardenTheme.CLASSIC, GardenTheme.FOREST), selection?.ownedThemes)
+        assertEquals(GardenTheme.FOREST, selection?.activeTheme)
     }
 
     @Test
-    fun unaffordableBackgroundPurchaseIsRejected() {
+    fun unaffordableThemePurchaseIsRejected() {
         assertNull(
-            selectGardenBackground(
+            selectGardenTheme(
                 gold = 149,
-                ownedBackgrounds = listOf("classic"),
-                activeBackground = "classic",
-                backgroundId = "forest",
-                price = 150
+                ownedThemes = listOf(GardenTheme.CLASSIC),
+                theme = GardenTheme.FOREST
             )
         )
     }

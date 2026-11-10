@@ -38,10 +38,6 @@ import com.example.plantyourhabit.ui.theme.Gold100
 import com.example.plantyourhabit.ui.theme.Gold700
 import com.example.plantyourhabit.ui.theme.Green100
 import com.example.plantyourhabit.ui.theme.Green200
-import com.example.plantyourhabit.ui.theme.Green300
-import com.example.plantyourhabit.ui.theme.ForestGardenBackdrop
-import com.example.plantyourhabit.ui.theme.EveningGardenBackdrop
-import com.example.plantyourhabit.ui.theme.EveningGardenSunset
 import com.example.plantyourhabit.ui.theme.Green700
 import com.example.plantyourhabit.ui.theme.Green900
 import com.example.plantyourhabit.ui.theme.TextMuted
@@ -56,11 +52,7 @@ private val DarkShopIconSurface = Color(0xFF747876)
 private enum class ShopArt(val drawable: Int) {
     MONEY_PLANT(R.drawable.ic_shop_money_plant),
     CACTUS(R.drawable.ic_shop_cactus),
-    ORCHID(R.drawable.ic_shop_orchid),
-    LEAF(R.drawable.ic_shop_leaf),
-    SUN(R.drawable.ic_shop_sun),
-    MOON(R.drawable.ic_shop_moon),
-    TREE(R.drawable.ic_shop_tree)
+    ORCHID(R.drawable.ic_shop_orchid)
 }
 
 private data class ShopProduct(val id: Int, val name: String, val price: Int, val art: ShopArt)
@@ -76,28 +68,14 @@ private val plantProducts = listOf(
     ShopProduct(3, "Orchid", 105, ShopArt.ORCHID)
 )
 
-private val gardenThemes = listOf(
-    ShopProduct(1, "Classic garden", 0, ShopArt.LEAF),
-    ShopProduct(2, "Warm sunroom", 90, ShopArt.SUN),
-    ShopProduct(3, "Quiet evening", 120, ShopArt.MOON),
-    ShopProduct(4, "Forest nook", 150, ShopArt.TREE)
-)
-
-private fun backgroundKey(id: Int): String = when (id) {
-    1 -> "classic"
-    2 -> "sunroom"
-    3 -> "evening"
-    else -> "forest"
-}
-
 @Composable
 fun ShopScreen(
     gold: Int,
     ownedPlants: List<PlantType>,
-    ownedBackgrounds: List<String>,
-    activeBackground: String,
+    ownedThemes: List<GardenTheme>,
+    activeTheme: GardenTheme,
     onBuyPlant: (PlantType, Int) -> Unit,
-    onSelectBackground: (String, Int) -> Unit,
+    onSelectTheme: (GardenTheme) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -156,32 +134,32 @@ fun ShopScreen(
         ShopSectionHeading(
             "SET THE MOOD",
             "Garden backgrounds",
-            "${ownedBackgrounds.size}/${gardenThemes.size}"
+            "${ownedThemes.size}/${GardenTheme.entries.size}"
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)
         ) {
-            gardenThemes.take(2).forEach { theme ->
+            GardenTheme.entries.take(2).forEach { theme ->
                 BackgroundCard(
-                    product = theme,
-                    activeBackground = activeBackground,
-                    owned = backgroundKey(theme.id) in ownedBackgrounds,
+                    theme = theme,
+                    activeTheme = activeTheme,
+                    owned = theme in ownedThemes,
                     canAfford = gold >= theme.price,
                     modifier = Modifier.weight(1f),
-                    onClick = { onSelectBackground(backgroundKey(theme.id), theme.price) }
+                    onClick = { onSelectTheme(theme) }
                 )
             }
         }
         Spacer(Modifier.height(ShopTokens.StandardInset))
         Row(horizontalArrangement = Arrangement.spacedBy(ShopTokens.StandardInset)) {
-            gardenThemes.drop(2).forEach { theme ->
+            GardenTheme.entries.drop(2).forEach { theme ->
                 BackgroundCard(
-                    product = theme,
-                    activeBackground = activeBackground,
-                    owned = backgroundKey(theme.id) in ownedBackgrounds,
+                    theme = theme,
+                    activeTheme = activeTheme,
+                    owned = theme in ownedThemes,
                     canAfford = gold >= theme.price,
                     modifier = Modifier.weight(1f),
-                    onClick = { onSelectBackground(backgroundKey(theme.id), theme.price) }
+                    onClick = { onSelectTheme(theme) }
                 )
             }
         }
@@ -246,20 +224,14 @@ private fun ShopListRow(
 
 @Composable
 private fun BackgroundCard(
-    product: ShopProduct,
-    activeBackground: String,
+    theme: GardenTheme,
+    activeTheme: GardenTheme,
     owned: Boolean,
     canAfford: Boolean,
     modifier: Modifier,
     onClick: () -> Unit
 ) {
-    val isActive = activeBackground == backgroundKey(product.id)
-    val previewColor = when (product.id) {
-        1 -> Green300
-        2 -> SunroomGardenBackdrop
-        3 -> EveningGardenBackdrop
-        else -> ForestGardenBackdrop
-    }
+    val isActive = activeTheme == theme
     Surface(
         modifier = modifier.clickable(enabled = owned || canAfford, onClick = onClick),
         shape = RoundedCornerShape(ShopTokens.ShopBackgroundCardCornerRadius),
@@ -274,16 +246,18 @@ private fun BackgroundCard(
                     .fillMaxWidth()
                     .height(ShopTokens.ShopProductPreviewHeight)
                     .background(
-                        brush = if (product.id == 3) {
-                            Brush.verticalGradient(listOf(EveningGardenSunset, EveningGardenBackdrop))
-                        } else {
-                            Brush.verticalGradient(listOf(previewColor, previewColor))
-                        },
+                        brush = Brush.verticalGradient(
+                            listOf(theme.previewTopColor, theme.previewBottomColor)
+                        ),
                         shape = RoundedCornerShape(ShopTokens.CardInset)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                ShopArtwork(product.art, Modifier.fillMaxSize().padding(ShopTokens.SmallInset))
+                Image(
+                    painter = painterResource(theme.shopArtwork),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize().padding(ShopTokens.SmallInset)
+                )
                 if (isActive) {
                     Surface(
                         modifier = Modifier.align(Alignment.TopEnd).padding(ShopTokens.MicroPadding),
@@ -299,7 +273,7 @@ private fun BackgroundCard(
                 }
             }
             Text(
-                product.name,
+                theme.displayName,
                 modifier = Modifier.padding(start = ShopTokens.TinyInset, top = ShopTokens.SmallInset),
                 color = Green900,
                 fontWeight = FontWeight.Bold,
@@ -309,7 +283,7 @@ private fun BackgroundCard(
                 when {
                     isActive -> "Using now"
                     owned -> "Tap to use"
-                    else -> "Gold · ${product.price}"
+                    else -> "Gold · ${theme.price}"
                 },
                 modifier = Modifier.padding(start = ShopTokens.TinyInset, top = ShopTokens.TinyInset),
                 color = if (owned) Green700 else Gold700,

@@ -34,7 +34,7 @@ class AppScreensComposeTest {
             PlantYourHabitTheme {
                 GardenScreen(
                     habits = listOf(existingHabit),
-                    activeBackground = "classic",
+                    activeBackground = GardenTheme.CLASSIC,
                     selectedPlants = mapOf(existingHabit.id to existingHabit.plant),
                     habitSlots = mapOf(existingHabit.id to 0),
                     availablePlants = starterPlants,
@@ -67,7 +67,7 @@ class AppScreensComposeTest {
             PlantYourHabitTheme {
                 GardenScreen(
                     habits = listOf(habit),
-                    activeBackground = "classic",
+                    activeBackground = GardenTheme.CLASSIC,
                     selectedPlants = mapOf(habit.id to habit.plant),
                     habitSlots = mapOf(habit.id to 0),
                     availablePlants = starterPlants,
@@ -128,10 +128,10 @@ class AppScreensComposeTest {
                 ShopScreen(
                     gold = 100,
                     ownedPlants = emptyList(),
-                    ownedBackgrounds = listOf("classic"),
-                    activeBackground = "classic",
+                    ownedThemes = listOf(GardenTheme.CLASSIC),
+                    activeTheme = GardenTheme.CLASSIC,
                     onBuyPlant = { plant, price -> purchase = plant to price },
-                    onSelectBackground = { _, _ -> }
+                    onSelectTheme = {}
                 )
             }
         }
@@ -145,16 +145,16 @@ class AppScreensComposeTest {
 
     @Test
     fun shopBackgroundRowInvokesSelectionCallback() {
-        var selection: Pair<String, Int>? = null
+        var selection: GardenTheme? = null
         composeRule.setContent {
             PlantYourHabitTheme {
                 ShopScreen(
                     gold = 100,
                     ownedPlants = emptyList(),
-                    ownedBackgrounds = listOf("classic"),
-                    activeBackground = "classic",
+                    ownedThemes = listOf(GardenTheme.CLASSIC),
+                    activeTheme = GardenTheme.CLASSIC,
                     onBuyPlant = { _, _ -> },
-                    onSelectBackground = { id, price -> selection = id to price }
+                    onSelectTheme = { theme -> selection = theme }
                 )
             }
         }
@@ -164,7 +164,7 @@ class AppScreensComposeTest {
             .performClick()
 
         composeRule.runOnIdle {
-            assertEquals("sunroom" to 90, selection)
+            assertEquals(GardenTheme.SUNROOM, selection)
         }
     }
 
@@ -251,10 +251,10 @@ class AppScreensComposeTest {
                 ShopScreen(
                     gold = 10,
                     ownedPlants = emptyList(),
-                    ownedBackgrounds = listOf("classic"),
-                    activeBackground = "classic",
+                    ownedThemes = listOf(GardenTheme.CLASSIC),
+                    activeTheme = GardenTheme.CLASSIC,
                     onBuyPlant = { _, _ -> },
-                    onSelectBackground = { _, _ -> }
+                    onSelectTheme = {}
                 )
             }
         }
@@ -270,7 +270,7 @@ class AppScreensComposeTest {
             PlantYourHabitTheme {
                 GardenScreen(
                     habits = listOf(habit),
-                    activeBackground = "classic",
+                    activeBackground = GardenTheme.CLASSIC,
                     selectedPlants = mapOf(habit.id to habit.plant),
                     habitSlots = mapOf(habit.id to 0),
                     availablePlants = starterPlants + PlantType.CACTUS,

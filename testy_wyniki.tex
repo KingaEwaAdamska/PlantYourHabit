@@ -1,0 +1,149 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[margin=2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{verbatim}
+\usepackage{fvextra}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true,fontsize=\scriptsize}
+
+\title{Opis przeprowadzonych testów i uzyskane wyniki\\PlantYourHabit}
+\date{10 listopada 2026}
+
+\begin{document}
+\maketitle
+
+\section{Cel testów}
+Testy sprawdzają najważniejsze reguły działania aplikacji PlantYourHabit: rejestrowanie i obliczanie serii nawyków, obsługę tagów i filtrowanie questów oraz operacje zakupu w sklepie. W projekcie znajdują się również testy interfejsu Compose, które sprawdzają reakcje ekranów na działania użytkownika.
+
+\section{Testy jednostkowe}
+Testy jednostkowe uruchomiono na komputerze deweloperskim poleceniem:
+\begin{verbatim}
+./gradlew testDebugUnitTest --no-daemon
+\end{verbatim}
+
+Wynik wykonania: \textbf{BUILD SUCCESSFUL}. Raport Gradle wykazał 24 uruchomione testy, 0 błędów, 0 niepowodzeń i 0 pominiętych testów.
+
+\begin{center}
+\begin{tabular}{@{}p{0.34\linewidth}p{0.43\linewidth}r@{}}
+\toprule
+\textbf{Plik testowy} & \textbf{Zakres sprawdzanych przypadków} & \textbf{Testy} \\
+\midrule
+\texttt{HabitTest.kt} &
+Dodawanie i usuwanie dnia pielęgnacji, ciągłość i reset serii, ignorowanie przyszłych lub powtórzonych dat, limity serii i progi wzrostu rośliny. & 13 \\
+\texttt{QuestTest.kt} &
+Normalizacja tagów, usuwanie duplikatów, sortowanie dostępnych tagów, filtrowanie ukończonych zadań oraz dopasowanie wielu tagów. & 5 \\
+\texttt{ShopOperationsTest.kt} &
+Zakup roślin i motywów, naliczanie kosztu, wybór posiadanego motywu oraz odrzucanie zakupów bez wystarczającej liczby monet lub duplikatów. & 5 \\
+\texttt{ExampleUnitTest.kt} &
+Podstawowy test kontrolny poprawności działania testów jednostkowych. & 1 \\
+\midrule
+\textbf{Łącznie} & & \textbf{24} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Surowe wyniki raportów testów jednostkowych}
+\begin{verbatim}
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.plantyourhabit.ExampleUnitTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-11-10T01:07:38.108Z" hostname="kadamska-arch-pc" time="0.002">
+  <properties/>
+  <testcase name="addition_isCorrect" classname="com.example.plantyourhabit.ExampleUnitTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.plantyourhabit.HabitTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-11-10T01:07:38.112Z" hostname="kadamska-arch-pc" time="0.02">
+  <properties/>
+  <testcase name="addingTodayAfterYesterdayContinuesStreak" classname="com.example.plantyourhabit.HabitTest" time="0.01"/>
+  <testcase name="futureCareDaysDoNotCountAsHistoryOrStreak" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="streakExpiresAfterMissingMoreThanOneDay" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="streakNeverExceedsMaximum" classname="com.example.plantyourhabit.HabitTest" time="0.001"/>
+  <testcase name="removingTodayPreservesOtherCareDays" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="exampleCareDaysClampsValuesToSupportedRange" classname="com.example.plantyourhabit.HabitTest" time="0.003"/>
+  <testcase name="addingTodayAfterGapResetsCareHistory" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="exampleCareDaysEndsYesterday" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="addingTodayStartsStreakAndDoesNotDuplicateCareDay" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="addingTodayRemovesDuplicatesAndIgnoresFutureRecords" classname="com.example.plantyourhabit.HabitTest" time="0.001"/>
+  <testcase name="removingTodayLeavesOriginalHabitUnchanged" classname="com.example.plantyourhabit.HabitTest" time="0.0"/>
+  <testcase name="growthLabelsFollowStreakStageThresholds" classname="com.example.plantyourhabit.HabitTest" time="0.003"/>
+  <testcase name="continuingLongStreakRetainsOnlyMostRecentDays" classname="com.example.plantyourhabit.HabitTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.plantyourhabit.QuestTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-10T01:07:38.133Z" hostname="kadamska-arch-pc" time="0.006">
+  <properties/>
+  <testcase name="questTagsAreTrimmedAndCaseInsensitiveDuplicatesCollapse" classname="com.example.plantyourhabit.QuestTest" time="0.003"/>
+  <testcase name="availableTagsAreUniqueCaseInsensitivelyAndSorted" classname="com.example.plantyourhabit.QuestTest" time="0.001"/>
+  <testcase name="selectedTagsMatchIgnoringCaseAndWhitespace" classname="com.example.plantyourhabit.QuestTest" time="0.0"/>
+  <testcase name="filteringCanHideCompletedQuests" classname="com.example.plantyourhabit.QuestTest" time="0.0"/>
+  <testcase name="selectedTagsUseOrMatchingAndCompletedItemsSortLast" classname="com.example.plantyourhabit.QuestTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.plantyourhabit.ShopOperationsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-11-10T01:07:38.140Z" hostname="kadamska-arch-pc" time="0.007">
+  <properties/>
+  <testcase name="unaffordableThemePurchaseIsRejected" classname="com.example.plantyourhabit.ShopOperationsTest" time="0.006"/>
+  <testcase name="unaffordableOrDuplicatePlantPurchasesAreRejected" classname="com.example.plantyourhabit.ShopOperationsTest" time="0.0"/>
+  <testcase name="selectingOwnedThemeDoesNotCostGold" classname="com.example.plantyourhabit.ShopOperationsTest" time="0.001"/>
+  <testcase name="plantPurchaseDeductsGoldAndAddsOwnership" classname="com.example.plantyourhabit.ShopOperationsTest" time="0.0"/>
+  <testcase name="purchasingThemeDeductsGoldAndActivatesIt" classname="com.example.plantyourhabit.ShopOperationsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
+\end{verbatim}
+
+\section{Testy interfejsu i testy instrumentacyjne}
+W katalogu \texttt{app/src/androidTest} przygotowano 10 testów ekranów Compose oraz 1 test sprawdzający kontekst aplikacji na urządzeniu. Testy ekranów obejmują m.in. dodawanie nawyku i questa, oznaczanie questa jako ukończonego, edycję zadania, wybór rośliny oraz zachowanie sklepu.
+
+Testy uruchomiono poleceniem:
+\begin{verbatim}
+./gradlew connectedDebugAndroidTest -Pandroid.injected.device.serial=R3CW40M8HAA --no-daemon
+\end{verbatim}
+na podłączonym telefonie \texttt{SM-S901B - 16} oraz emulatorze \texttt{Medium\_Phone\_API\_37.0 (AVD) - 17}. Na telefonie zakończyło się powodzeniem wszystkich 11 testów: 10 testów ekranów Compose i test kontekstu aplikacji. Na emulatorze test kontekstu aplikacji przeszedł, natomiast 10 testów ekranów Compose zatrzymało się podczas inicjalizacji Espresso z wyjątkiem:
+\begin{verbatim}
+java.lang.NoSuchMethodException:
+android.hardware.input.InputManager.getInstance []
+\end{verbatim}
+Na telefonie testy dotarły do asercji i wszystkie zakończyły się powodzeniem. Błąd na emulatorze wystąpił przed wykonaniem asercji interfejsu i wskazuje na problem zgodności używanego środowiska lub bibliotek testowych z API emulatora. Zadanie Gradle jako całość zgłosiło niepowodzenie z powodu wyników emulatora, mimo że wszystkie testy na telefonie przeszły. Raporty znajdują się w \texttt{app/build/outputs/androidTest-results/connected/debug/}.
+
+\section{Surowe wyniki raportów testów instrumentacyjnych}
+\subsection{Telefon SM-S901B}
+\begin{verbatim}
+<testsuites tests="11" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-10T01:02:13" hostname="localhost">
+  <testsuite name="com.example.plantyourhabit.AppScreensComposeTest" tests="10" failures="0" errors="0" skipped="0" time="13.800" timestamp="2026-11-10T01:02:13" hostname="localhost">
+    <testcase name="shopBackgroundRowInvokesSelectionCallback" classname="com.example.plantyourhabit.AppScreensComposeTest" time="1.510" />
+    <testcase name="tappingGardenHabitInvokesToggleCallback" classname="com.example.plantyourhabit.AppScreensComposeTest" time="1.189" />
+    <testcase name="completedQuestCheckboxIsDisabled" classname="com.example.plantyourhabit.AppScreensComposeTest" time="0.938" />
+    <testcase name="shopPlantRowInvokesPurchaseCallback" classname="com.example.plantyourhabit.AppScreensComposeTest" time="1.009" />
+    <testcase name="shopPlantPurchaseIsDisabledWithoutEnoughGold" classname="com.example.plantyourhabit.AppScreensComposeTest" time="0.958" />
+    <testcase name="questCompletionCheckboxInvokesCallback" classname="com.example.plantyourhabit.AppScreensComposeTest" time="0.996" />
+    <testcase name="gardenAddHabitDialogCreatesHabit" classname="com.example.plantyourhabit.AppScreensComposeTest" time="1.804" />
+    <testcase name="gardenPlantPickerSelectsAvailablePlant" classname="com.example.plantyourhabit.AppScreensComposeTest" time="1.343" />
+    <testcase name="questEditorCreatesQuestFromEnteredDetails" classname="com.example.plantyourhabit.AppScreensComposeTest" time="2.381" />
+    <testcase name="questEditorSavesEditedTitle" classname="com.example.plantyourhabit.AppScreensComposeTest" time="1.672" />
+  <testsuite name="com.example.plantyourhabit.ExampleInstrumentedTest" tests="1" failures="0" errors="0" skipped="0" time="0.009" timestamp="2026-11-10T01:02:13" hostname="localhost">
+    <testcase name="useAppContext" classname="com.example.plantyourhabit.ExampleInstrumentedTest" time="0.009" />
+\end{verbatim}
+
+\subsection{Emulator API 37}
+\begin{verbatim}
+<testsuites tests="11" failures="10" errors="0" skipped="0" time="0.000" timestamp="2026-11-10T01:01:57" hostname="localhost">
+  <testsuite name="com.example.plantyourhabit.AppScreensComposeTest" tests="10" failures="10" errors="0" skipped="0" time="0.022" timestamp="2026-11-10T01:01:57" hostname="localhost">
+    <testcase name="shopBackgroundRowInvokesSelectionCallback" classname="com.example.plantyourhabit.AppScreensComposeTest" time="0.001">
+      <failure>java.lang.RuntimeException: java.util.concurrent.ExecutionException: java.lang.RuntimeException: java.lang.NoSuchMethodException: android.hardware.input.InputManager.getInstance []
+  <testsuite name="com.example.plantyourhabit.ExampleInstrumentedTest" tests="1" failures="0" errors="0" skipped="0" time="0.000" timestamp="2026-11-10T01:01:57" hostname="localhost">
+    <testcase name="useAppContext" classname="com.example.plantyourhabit.ExampleInstrumentedTest" time="0.000" />
+\end{verbatim}
+
+\section{Podsumowanie}
+Wszystkie 24 testy jednostkowe oraz wszystkie 11 testów instrumentacyjnych na telefonie zakończyły się powodzeniem. Niepowodzenia dotyczą wyłącznie uruchomienia 10 testów Compose na emulatorze API 37, gdzie testy nie dochodzą do asercji.
+
+\end{document}

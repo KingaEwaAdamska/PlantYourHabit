@@ -1,0 +1,192 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[polish]{babel}
+\usepackage[margin=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{verbatim}
+\usepackage{fvextra}
+\usepackage{hyperref}
+\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true,fontsize=\small}
+
+\title{Opis struktury projektu PlantYourHabit}
+\date{10 listopada 2026}
+
+\begin{document}
+\maketitle
+
+\section{Informacje ogólne}
+PlantYourHabit jest aplikacją mobilną na system Android, napisaną w języku Kotlin. Interfejs użytkownika zbudowano z wykorzystaniem Jetpack Compose i biblioteki Material 3. Projekt składa się z jednego modułu aplikacji --- \texttt{app}. Główne funkcje aplikacji to ekran ogrodu z nawykami, lista questów oraz sklep z roślinami i motywami wizualnymi.
+
+\section{Układ katalogów}
+Poniższe drzewo przedstawia najważniejsze pliki projektu. Katalogi z zasobami zawierają dodatkowo pliki graficzne i konfiguracyjne, których nie wypisano pojedynczo.
+
+\begin{verbatim}
+PlantYourHabit/
+|-- app/
+|   |-- build.gradle.kts
+|   `-- src/
+|       |-- main/
+|       |   |-- AndroidManifest.xml
+|       |   |-- java/com/example/plantyourhabit/
+|       |   |   |-- MainActivity.kt
+|       |   |   |-- AppComponents.kt
+|       |   |   |-- AppStateStore.kt
+|       |   |   |-- AppTokens.kt
+|       |   |   |-- GardenRoom.kt
+|       |   |   |-- GardenScreen.kt
+|       |   |   |-- GardenTheme.kt
+|       |   |   |-- GardenTokens.kt
+|       |   |   |-- GardenDialogs.kt
+|       |   |   |-- Habit.kt
+|       |   |   |-- PlantArtwork.kt
+|       |   |   |-- PlantIntroVideo.kt
+|       |   |   |-- PlantType.kt
+|       |   |   |-- Quest.kt
+|       |   |   |-- QuestsScreen.kt
+|       |   |   |-- QuestsTokens.kt
+|       |   |   |-- ShopOperations.kt
+|       |   |   |-- ShopScreen.kt
+|       |   |   |-- ShopTokens.kt
+|       |   |   `-- ui/theme/
+|       |   |       |-- Color.kt
+|       |   |       |-- Theme.kt
+|       |   |       `-- Type.kt
+|       |   |-- res/
+|       |   |   |-- drawable/       (ikony i ilustracje roślin)
+|       |   |   |-- drawable-nodpi/ (grafiki okien i tła)
+|       |   |   |-- mipmap-*/       (ikony aplikacji)
+|       |   |   |-- raw/            (dźwięki i film wprowadzający)
+|       |   |   |-- values/         (nazwy i motywy Androida)
+|       |   |   `-- xml/            (reguły kopii zapasowej)
+|       |   `-- keepRules/rules.keep
+|       |-- test/java/com/example/plantyourhabit/
+|       |   |-- ExampleUnitTest.kt
+|       |   |-- HabitTest.kt
+|       |   |-- QuestTest.kt
+|       |   `-- ShopOperationsTest.kt
+|       `-- androidTest/java/com/example/plantyourhabit/
+|           |-- AppScreensComposeTest.kt
+|           `-- ExampleInstrumentedTest.kt
+|-- gradle/
+|   |-- libs.versions.toml
+|   |-- gradle-daemon-jvm.properties
+|   `-- wrapper/
+|-- build.gradle.kts
+|-- settings.gradle.kts
+|-- gradle.properties
+|-- gradlew
+`-- gradlew.bat
+\end{verbatim}
+
+\section{Moduł aplikacji}
+\subsection{Punkt wejścia i przepływ danych}
+\texttt{MainActivity.kt} uruchamia aplikację, konfiguruje motyw oraz wyświetla główny interfejs. W komponencie \texttt{PlantYourHabitApp} przechowywany jest stan ekranów, nawyków, questów, monet i elementów odblokowanych przez użytkownika. Wybór ekranu odbywa się przez dolny pasek nawigacyjny. Z tego miejsca przekazywane są też funkcje obsługujące działania użytkownika do poszczególnych ekranów.
+
+\texttt{AppStateStore.kt} odpowiada za odczyt i zapis trwałego stanu aplikacji w \texttt{SharedPreferences}. Dane questów, monet, posiadanych roślin i motywów są kodowane do formatu JSON. Ustawienie jasnego lub ciemnego motywu jest przechowywane oddzielnie. Nawyki i przypisane im rośliny są obecnie przechowywane w stanie interfejsu; początkowa lista nawyków jest zdefiniowana w \texttt{Habit.kt}.
+
+\paragraph{Odczyt i zapis stanu.}
+\texttt{AppStateStore.load()} odczytuje JSON i odtwarza stan początkowy, jeśli zapis jeszcze nie istnieje. \texttt{save()} koduje stan do JSON i zapisuje go w preferencjach; niepowodzenie zapisu zgłaszane jest jako błąd. W \texttt{MainActivity.kt} zapis jest wywoływany ponownie, gdy zmieni się obiekt stanu przeznaczony do utrwalenia.
+
+\begin{verbatim}
+fun load(): PersistedAppState {
+    val savedState = preferences.getString(STATE_KEY, null)
+        ?: return PersistedAppState.initial()
+    return decodeState(JSONObject(savedState))
+}
+
+fun save(state: PersistedAppState) {
+    val saved = preferences.edit()
+        .putString(STATE_KEY, encodeState(state).toString())
+        .commit()
+    check(saved) { "Failed to persist app state" }
+}
+
+LaunchedEffect(stateToPersist) {
+    appStateStore.save(stateToPersist)
+}
+\end{verbatim}
+
+\subsection{Interfejs użytkownika}
+Ekrany i ich elementy są zaimplementowane jako funkcje \texttt{Composable}:
+\begin{itemize}[leftmargin=1.2cm]
+  \item \texttt{GardenScreen.kt} i \texttt{GardenRoom.kt} --- ekran ogrodu, obsługa nawyków oraz ich wizualizacja na półkach;
+  \item \texttt{QuestsScreen.kt} --- lista questów, filtrowanie, dodawanie i edycja zadań;
+  \item \texttt{ShopScreen.kt} --- sklep z roślinami i motywami ogrodu;
+  \item \texttt{AppComponents.kt} i \texttt{GardenDialogs.kt} --- współdzielone elementy interfejsu i okna dialogowe;
+  \item \texttt{PlantArtwork.kt} i \texttt{PlantIntroVideo.kt} --- grafiki roślin oraz ekran filmu wprowadzającego.
+\end{itemize}
+
+Pliki \texttt{AppTokens.kt}, \texttt{GardenTokens.kt}, \texttt{QuestsTokens.kt} i \texttt{ShopTokens.kt} grupują wartości używane do formatowania poszczególnych części interfejsu. Katalog \texttt{ui/theme} zawiera definicje kolorów, typografii i motywu Compose.
+
+\subsection{Dane i reguły aplikacji}
+\texttt{Habit.kt} zawiera model nawyku oraz reguły obliczania serii i etapów wzrostu rośliny. \texttt{Quest.kt} definiuje model questa i funkcje normalizowania tagów, filtrowania oraz przygotowania listy zadań. Typy roślin znajdują się w \texttt{PlantType.kt}, a dostępne motywy ogrodu w \texttt{GardenTheme.kt}. \texttt{ShopOperations.kt} zawiera operacje zakupu roślin i wyboru motywu wraz z kontrolą salda monet.
+
+\section{Zasoby aplikacji}
+Katalog \texttt{app/src/main/res} przechowuje zasoby niewykonywalne przez Kotlin. W \texttt{drawable} znajdują się ikony i ilustracje wykorzystywane w interfejsie, a \texttt{drawable-nodpi} zawiera grafiki tła i okien ogrodu. Katalogi \texttt{mipmap-*} zawierają ikony aplikacji w różnych gęstościach ekranu. W \texttt{raw} umieszczono dźwięki związane z nawykami oraz film wprowadzający. Pliki w \texttt{values} definiują m.in. nazwę i motyw systemowy aplikacji; pliki w \texttt{xml} określają zasady kopii zapasowej danych.
+
+\subsection{Film wprowadzający}
+Plik \texttt{app/src/main/res/raw/plant\_intro.mp4} jest odtwarzany przez \texttt{VideoView} osadzony w Compose za pomocą \texttt{AndroidView}. \texttt{MainActivity.kt} pokazuje ekran intro po uruchomieniu aplikacji i ukrywa go po zakończeniu filmu albo po wybraniu opcji pominięcia. Film jest wyciszony; w razie błędu odtwarzania aplikacja zapisuje błąd w logu i zamyka ekran intro. Po usunięciu widoku odtwarzanie jest zatrzymywane.
+
+\begin{verbatim}
+setOnCompletionListener { latestOnFinished.value() }
+setOnErrorListener { _, what, extra ->
+    Log.e("PlantYourHabit", "Intro video playback failed (what=$what, extra=$extra)")
+    latestOnFinished.value()
+    true
+}
+setOnPreparedListener { player -> player.setVolume(0f, 0f) }
+setVideoURI(
+    Uri.parse("android.resource://${context.packageName}/${R.raw.plant_intro}")
+)
+start()
+
+DisposableEffect(videoView) {
+    onDispose { videoView.stopPlayback() }
+}
+\end{verbatim}
+
+\subsection{Dźwięki nawyków}
+Dwa pliki dźwiękowe znajdują się w \texttt{app/src/main/res/raw}: \texttt{habit\_sound.wav} jest odtwarzany po oznaczeniu nawyku jako wykonanego, a \texttt{habit\_lose\_sound.wav} po cofnięciu wykonania. \texttt{MainActivity.kt} ładuje je przez \texttt{SoundPool}, czeka na zakończenie ładowania i odtwarza dźwięk tylko wtedy, gdy jest gotowy. Obiekt \texttt{SoundPool} jest zwalniany po usunięciu komponentu.
+
+\begin{verbatim}
+habitSoundId = habitSoundPool.load(context, R.raw.habit_sound, 1)
+habitLoseSoundId = habitSoundPool.load(context, R.raw.habit_lose_sound, 1)
+
+val done = today.toString() in habit.careDays
+val soundLoaded = if (done) habitLoseSoundLoaded else habitSoundLoaded
+if (soundLoaded) {
+    val soundId = if (done) habitLoseSoundId else habitSoundId
+    val streamId = habitSoundPool.play(soundId, 1f, 1f, 1, 0, 1f)
+}
+\end{verbatim}
+
+\subsection{Grafiki roślin i ich formatowanie}
+Ilustracje roślin znajdują się w \texttt{res/drawable} jako zasoby rysowalne Androida (m.in. pliki XML typu \texttt{vector}), a nie jako zdjęcia użytkownika. Przykładowe pliki to \texttt{ic\_plant\_fern.xml}, \texttt{ic\_plant\_monstera.xml}, \texttt{ic\_plant\_cactus.xml} oraz grafiki doniczek i kwiatów. \texttt{PlantArtwork.kt} wybiera ilustrację zależnie od gatunku oraz historii nawyku: na początku wyświetla nasiono, po przerwaniu historii pielęgnacji --- uschniętą roślinę, a w pozostałych przypadkach grafikę danego gatunku. Doniczka i opcjonalny kwiat są nakładane na roślinę jako osobne obrazy.
+
+Obraz jest dopasowywany do całego obszaru rośliny przez \texttt{ContentScale.FillBounds}. Oznacza to wypełnienie dostępnej szerokości i wysokości, nawet jeśli proporcje grafiki różnią się od proporcji obszaru. \texttt{graphicsLayer} skaluje roślinę wraz z postępem nawyku, a filtr kolorów zmienia jej wygląd. Wzrost jest animowany, a dodatkowy kwiat pojawia się po osiągnięciu 75\% maksymalnej serii.
+
+\begin{verbatim}
+val plantModifier = Modifier
+    .fillMaxSize()
+    .graphicsLayer {
+        scaleX = plantScale.scaleX
+        scaleY = plantScale.scaleY
+        transformOrigin = TransformOrigin(.5f, .78f)
+    }
+
+Image(
+    painter = painterResource(resource),
+    contentScale = ContentScale.FillBounds,
+    colorFilter = if (state.animatedStage > 0f) state.colorFilter else null,
+    modifier = state.modifier
+)
+\end{verbatim}
+
+\section{Testy}
+Testy jednostkowe znajdują się w \texttt{app/src/test}. Sprawdzają przede wszystkim obliczenia serii nawyków, logikę questów i operacje sklepu. Testy instrumentacyjne umieszczono w \texttt{app/src/androidTest}; obejmują testy ekranów Compose oraz test uruchomiony na urządzeniu lub emulatorze.
+
+\section{Konfiguracja i budowanie}
+Pliki \texttt{settings.gradle.kts} i główny \texttt{build.gradle.kts} konfigurują projekt Gradle i jego moduły. Konfiguracja modułu, identyfikator aplikacji, wersje SDK, opcje kompilacji i zależności znajdują się w \texttt{app/build.gradle.kts}. Katalog \texttt{gradle} zawiera katalog wersji bibliotek oraz pliki Gradle Wrapper, dzięki którym projekt można budować przy użyciu skryptu \texttt{gradlew} (Linux/macOS) lub \texttt{gradlew.bat} (Windows).
+
+\end{document}

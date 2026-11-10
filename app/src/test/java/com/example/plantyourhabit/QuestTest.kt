@@ -5,6 +5,14 @@ import org.junit.Test
 
 class QuestTest {
     @Test
+    fun questTagsAreTrimmedAndCaseInsensitiveDuplicatesCollapse() {
+        assertEquals(
+            listOf("Home", "HEALTH"),
+            normalizeQuestTags(listOf(" Home ", "home", "HEALTH", ""))
+        )
+    }
+
+    @Test
     fun availableTagsAreUniqueCaseInsensitivelyAndSorted() {
         val quests = listOf(
             quest(1, tags = listOf("Home", "health")),

@@ -9,8 +9,8 @@ internal data class PersistedAppState(
     val quests: List<Quest>,
     val completedQuestIds: Set<Int>,
     val ownedPlants: List<PlantType>,
-    val ownedBackgrounds: List<String>,
-    val activeBackground: String
+    val ownedThemes: List<GardenTheme>,
+    val activeTheme: GardenTheme
 ) {
     companion object {
         fun initial(): PersistedAppState {
@@ -19,8 +19,8 @@ internal data class PersistedAppState(
                 quests = initialQuests,
                 completedQuestIds = emptySet(),
                 ownedPlants = emptyList(),
-                ownedBackgrounds = listOf("classic"),
-                activeBackground = "classic"
+                ownedThemes = listOf(GardenTheme.CLASSIC),
+                activeTheme = GardenTheme.CLASSIC
             )
         }
     }
@@ -62,8 +62,8 @@ internal class AppStateStore(context: Context) {
         put("ownedPlants", JSONArray().apply {
             state.ownedPlants.forEach { put(it.name) }
         })
-        put("ownedBackgrounds", JSONArray(state.ownedBackgrounds))
-        put("activeBackground", state.activeBackground)
+        put("ownedBackgrounds", JSONArray(state.ownedThemes.map(GardenTheme::storageKey)))
+        put("activeBackground", state.activeTheme.storageKey)
     }
 
     private fun decodeState(json: JSONObject): PersistedAppState {
@@ -85,8 +85,9 @@ internal class AppStateStore(context: Context) {
             quests = quests,
             completedQuestIds = json.getJSONArray("completedQuestIds").toIntList().toSet(),
             ownedPlants = json.getJSONArray("ownedPlants").toStringList().map(PlantType::valueOf),
-            ownedBackgrounds = json.getJSONArray("ownedBackgrounds").toStringList(),
-            activeBackground = json.getString("activeBackground")
+            ownedThemes = json.getJSONArray("ownedBackgrounds").toStringList()
+                .map(GardenTheme::fromStorageKey),
+            activeTheme = GardenTheme.fromStorageKey(json.getString("activeBackground"))
         )
     }
 

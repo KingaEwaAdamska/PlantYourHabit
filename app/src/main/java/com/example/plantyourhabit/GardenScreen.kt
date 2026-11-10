@@ -46,7 +46,7 @@ import com.example.plantyourhabit.ui.theme.LocalAppDarkTheme
 @Composable
 fun GardenScreen(
     habits: List<Habit>,
-    activeBackground: String,
+    activeBackground: GardenTheme,
     selectedPlants: Map<Int, PlantType>,
     habitSlots: Map<Int, Int>,
     availablePlants: List<PlantType>,
