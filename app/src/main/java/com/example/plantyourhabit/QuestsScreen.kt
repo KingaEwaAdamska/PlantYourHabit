@@ -142,7 +142,7 @@ fun QuestsScreen(
                             modifier = Modifier.clickable { selectedTagFilters = emptySet() }
                         )
                         availableTags.forEach { tag ->
-                            val normalizedTag = tag.trim().lowercase()
+                            val normalizedTag = normalizeQuestTag(tag)
                             val selected = normalizedTag in selectedTagFilters
                             TagChip(
                                 text = tag,
@@ -325,7 +325,7 @@ private fun QuestEditorDialog(
                     onSave(
                         title.trim(),
                         description.trim(),
-                        tags.split(",").map(String::trim).filter(String::isNotEmpty),
+                        normalizeQuestTags(tags.split(",")),
                         difficulty,
                         validReward
                     )

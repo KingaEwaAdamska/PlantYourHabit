@@ -7,8 +7,8 @@ data class PlantShopState(
 
 data class GardenShopState(
     val gold: Int,
-    val ownedBackgrounds: List<String>,
-    val activeBackground: String
+    val ownedThemes: List<GardenTheme>,
+    val activeTheme: GardenTheme
 )
 
 fun purchasePlant(
@@ -25,21 +25,18 @@ fun purchasePlant(
     )
 }
 
-fun selectGardenBackground(
+fun selectGardenTheme(
     gold: Int,
-    ownedBackgrounds: List<String>,
-    activeBackground: String,
-    backgroundId: String,
-    price: Int
+    ownedThemes: List<GardenTheme>,
+    theme: GardenTheme
 ): GardenShopState? {
-    require(price >= 0) { "Background price cannot be negative" }
-    if (backgroundId in ownedBackgrounds) {
-        return GardenShopState(gold, ownedBackgrounds, backgroundId)
+    if (theme in ownedThemes) {
+        return GardenShopState(gold, ownedThemes, theme)
     }
-    if (gold < price) return null
+    if (gold < theme.price) return null
     return GardenShopState(
-        gold = gold - price,
-        ownedBackgrounds = ownedBackgrounds + backgroundId,
-        activeBackground = backgroundId
+        gold = gold - theme.price,
+        ownedThemes = ownedThemes + theme,
+        activeTheme = theme
     )
 }
